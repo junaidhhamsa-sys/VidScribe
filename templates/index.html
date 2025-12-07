@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Summarizer - AI Powered</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                    <rect width="40" height="40" rx="8" fill="url(#gradient)"/>
+                    <path d="M15 12L25 20L15 28V12Z" fill="white"/>
+                    <defs>
+                        <linearGradient id="gradient" x1="0" y1="0" x2="40" y2="40">
+                            <stop offset="0%" stop-color="#667eea"/>
+                            <stop offset="100%" stop-color="#764ba2"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <h1>Video Summarizer</h1>
+            </div>
+            <p class="subtitle">Transform videos into presentations with AI</p>
+        </header>
+
+        <!-- Upload Section -->
+        <div class="upload-section" id="uploadSection">
+            <div class="upload-box" id="uploadBox">
+                <div class="upload-icon">
+                    <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                        <path d="M32 12L32 42M32 12L22 22M32 12L42 22" stroke="url(#uploadGradient)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M52 42V52H12V42" stroke="url(#uploadGradient)" stroke-width="4" stroke-linecap="round"/>
+                        <defs>
+                            <linearGradient id="uploadGradient" x1="0" y1="0" x2="64" y2="64">
+                                <stop offset="0%" stop-color="#667eea"/>
+                                <stop offset="100%" stop-color="#764ba2"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <h2>Drop your video here</h2>
+                <p>or click to browse</p>
+                <p class="supported-formats">Supports: MP4, AVI, MOV, MKV (Max 500MB)</p>
+                <input type="file" id="videoInput" accept="video/mp4,video/avi,video/mov,video/x-matroska" hidden>
+            </div>
+        </div>
+
+        <!-- Processing Section -->
+        <div class="processing-section" id="processingSection" style="display: none;">
+            <div class="processing-card">
+                <div class="spinner"></div>
+                <h2>Processing Your Video</h2>
+                <p id="processingStatus">Extracting keyframes...</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section" id="resultsSection" style="display: none;">
+            <div class="results-card">
+                <div class="success-icon">
+                    <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                        <circle cx="32" cy="32" r="30" fill="url(#successGradient)" opacity="0.2"/>
+                        <path d="M20 32L28 40L44 24" stroke="url(#successGradient)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                        <defs>
+                            <linearGradient id="successGradient" x1="0" y1="0" x2="64" y2="64">
+                                <stop offset="0%" stop-color="#10b981"/>
+                                <stop offset="100%" stop-color="#059669"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <h2>Summary Complete!</h2>
+                
+                <div class="stats">
+                    <div class="stat">
+                        <span class="stat-value" id="keyframeCount">0</span>
+                        <span class="stat-label">Keyframes</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value" id="slidesCount">0</span>
+                        <span class="stat-label">Slides</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value" id="language">EN</span>
+                        <span class="stat-label">Language</span>
+                    </div>
+                </div>
+
+                <div class="summary-preview">
+                    <h3>Summary Preview</h3>
+                    <p id="summaryText"></p>
+                </div>
+
+                <button class="download-btn" id="downloadBtn">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M10 2V12M10 12L6 8M10 12L14 8M18 12V16C18 16.5304 17.7893 17.0391 17.4142 17.4142C17.0391 17.7893 16.5304 18 16 18H4C3.46957 18 2.96086 17.7893 2.58579 17.4142C2.21071 17.0391 2 16.5304 2 16V12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Download PowerPoint
+                </button>
+
+                <button class="secondary-btn" id="newVideoBtn">Process Another Video</button>
+            </div>
+        </div>
+
+        <!-- Error Section -->
+        <div class="error-section" id="errorSection" style="display: none;">
+            <div class="error-card">
+                <div class="error-icon">⚠️</div>
+                <h2>Processing Failed</h2>
+                <p id="errorMessage"></p>
+                <button class="secondary-btn" id="retryBtn">Try Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
