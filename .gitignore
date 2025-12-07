@@ -1,32 +1,35 @@
+# Environment variables
+.env
+
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-*.egg-info/
-dist/
-build/
 
 # Virtual Environment
-.venv/
 venv/
+env/
 ENV/
+
+# Uploads and Outputs
+static/uploads/*
+!static/uploads/.gitkeep
+outputs/*
+!outputs/.gitkeep
+temp/*
+!temp/.gitkeep
+
+# Logs
+logs/
+*.log
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-
-# Environment variables (IMPORTANT - contains API keys!)
-.env
-
-# Project specific
-static/uploads/
-output/
-temp/
-*.log
 
 # OS
 .DS_Store
@@ -37,9 +40,7 @@ Thumbs.db
 *.avi
 *.mov
 *.mkv
-*.wav
-
-
-.env.template
+*.flv
+*.wmv
 
 dlted/
