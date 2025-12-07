@@ -440,92 +440,92 @@ class GeminiProcessor:
             step = len(captions) // num_visuals if num_visuals > 0 else 1
             return list(range(0, len(captions), step))[:num_visuals]
     
-        def _parse_summary_response(self, text: str) -> Dict[str, any]:
-            """Parse structured summary response"""
-            result = {
-                'title': 'Video Summary',
-                'overview': '',
-                'key_points': [],
-                'detailed_summary': ''
-            }
+    def _parse_summary_response(self, text: str) -> Dict[str, any]:
+        """Parse structured summary response"""
+        result = {
+            'title': 'Video Summary',
+            'overview': '',
+            'key_points': [],
+            'detailed_summary': ''
+        }
         
-            try:
-                lines = text.split('\n')
-                current_section = None
+        try:
+            lines = text.split('\n')
+            current_section = None
             
-                for line in lines:
-                    line = line.strip()
+            for line in lines:
+                line = line.strip()
                 
-                    if line.startswith('TITLE:'):
-                        result['title'] = line.replace('TITLE:', '').strip()
-                    elif line.startswith('OVERVIEW:'):
-                        result['overview'] = line.replace('OVERVIEW:', '').strip()
-                        current_section = 'overview'
-                    elif line.startswith('KEY POINTS:'):
-                        current_section = 'key_points'
-                    elif line.startswith('DETAILED SUMMARY:'):
-                        current_section = 'detailed_summary'
-                    elif line.startswith('- ') and current_section == 'key_points':
-                        result['key_points'].append(line[2:].strip())
-                    elif current_section == 'overview' and line and not line.startswith(('TITLE:', 'KEY POINTS:')):
-                        result['overview'] += ' ' + line
-                    elif current_section == 'detailed_summary' and line:
-                        result['detailed_summary'] += line + '\n'
+                if line.startswith('TITLE:'):
+                    result['title'] = line.replace('TITLE:', '').strip()
+                elif line.startswith('OVERVIEW:'):
+                    result['overview'] = line.replace('OVERVIEW:', '').strip()
+                    current_section = 'overview'
+                elif line.startswith('KEY POINTS:'):
+                    current_section = 'key_points'
+                elif line.startswith('DETAILED SUMMARY:'):
+                    current_section = 'detailed_summary'
+                elif line.startswith('- ') and current_section == 'key_points':
+                    result['key_points'].append(line[2:].strip())
+                elif current_section == 'overview' and line and not line.startswith(('TITLE:', 'KEY POINTS:')):
+                    result['overview'] += ' ' + line
+                elif current_section == 'detailed_summary' and line:
+                    result['detailed_summary'] += line + '\n'
             
-                result['overview'] = result['overview'].strip()
-                result['detailed_summary'] = result['detailed_summary'].strip()
+            result['overview'] = result['overview'].strip()
+            result['detailed_summary'] = result['detailed_summary'].strip()
             
-            except Exception as e:
-                logger.error(f"Error parsing summary: {e}")
+        except Exception as e:
+            logger.error(f"Error parsing summary: {e}")
         
-            return result
+        return result
     
-        def _parse_sections_response(self, text: str) -> Dict:
-            """Parse structured sections response"""
-            result = {
-                'title': 'Content Summary',
-                'overview': '',
-                'sections': [],
-                'takeaways': []
-            }
+    def _parse_sections_response(self, text: str) -> Dict:
+        """Parse structured sections response"""
+        result = {
+            'title': 'Content Summary',
+            'overview': '',
+            'sections': [],
+            'takeaways': []
+        }
         
-            try:
-                lines = text.split('\n')
-                current_section = None
-                current_section_data = None
+        try:
+            lines = text.split('\n')
+            current_section = None
+            current_section_data = None
             
-                for line in lines:
-                    line = line.strip()
+            for line in lines:
+                line = line.strip()
                 
-                    if line.startswith('TITLE:'):
-                        result['title'] = line.replace('TITLE:', '').strip()
-                    elif line.startswith('OVERVIEW:'):
-                        result['overview'] = line.replace('OVERVIEW:', '').strip()
-                    elif line.startswith('SECTION '):
-                        if current_section_data:
-                            result['sections'].append(current_section_data)
-                        title = line.split(':', 1)[1].strip() if ':' in line else line
-                        current_section_data = {'title': title, 'content': []}
-                    elif line.startswith('KEY TAKEAWAYS:'):
-                        if current_section_data:
-                            result['sections'].append(current_section_data)
-                            current_section_data = None
-                        current_section = 'takeaways'
-                    elif line.startswith('- '):
-                        content = line[2:].strip()
-                        if current_section == 'takeaways':
-                            result['takeaways'].append(content)
-                        elif current_section_data:
-                            current_section_data['content'].append(content)
+                if line.startswith('TITLE:'):
+                    result['title'] = line.replace('TITLE:', '').strip()
+                elif line.startswith('OVERVIEW:'):
+                    result['overview'] = line.replace('OVERVIEW:', '').strip()
+                elif line.startswith('SECTION '):
+                    if current_section_data:
+                        result['sections'].append(current_section_data)
+                    title = line.split(':', 1)[1].strip() if ':' in line else line
+                    current_section_data = {'title': title, 'content': []}
+                elif line.startswith('KEY TAKEAWAYS:'):
+                    if current_section_data:
+                        result['sections'].append(current_section_data)
+                        current_section_data = None
+                    current_section = 'takeaways'
+                elif line.startswith('- '):
+                    content = line[2:].strip()
+                    if current_section == 'takeaways':
+                        result['takeaways'].append(content)
+                    elif current_section_data:
+                        current_section_data['content'].append(content)
             
-                # Add last section
-                if current_section_data:
-                    result['sections'].append(current_section_data)
+            # Add last section
+            if current_section_data:
+                result['sections'].append(current_section_data)
             
-            except Exception as e:
-                logger.error(f"Error parsing sections: {e}")
+        except Exception as e:
+            logger.error(f"Error parsing sections: {e}")
         
-            return result
+        return result
 
 
     def test_gemini_connection(api_key: str = None) -> bool:
