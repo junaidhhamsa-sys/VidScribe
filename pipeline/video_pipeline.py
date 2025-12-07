@@ -5,11 +5,11 @@ from pathlib import Path
 from typing import Dict
 import os
 
-from keyframe_extractor import KeyframeExtractor
-from audio_processor import AudioProcessor
+from core.keyframe_extractor import KeyframeExtractor
+from core.audio_processor import AudioProcessor
 from caption_generator import CaptionGenerator
 from text_summarizer import TextSummarizer
-from ppt_generator import PPTGenerator
+from generators.ppt_generator import PPTGenerator
 from utils.helpers import cleanup_temp_files, format_time
 import config
 

@@ -23,7 +23,7 @@ ENV/
 .env
 
 # Project specific
-uploads/
+static/uploads/
 output/
 temp/
 *.log
@@ -41,3 +41,5 @@ Thumbs.db
 
 
 .env.template
+
+dlted/
