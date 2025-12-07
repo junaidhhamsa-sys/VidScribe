@@ -142,3 +142,8 @@ Vidscribe-main
    └─ __init__.py
 
 ```
+
+
+# testing command 
+
+python -m pipeline.video_pipeline "C:\Users\Strix\Downloads\What Is n8n_ The Beginner-Friendly Automation Tool Explained.mp4" ppt professional

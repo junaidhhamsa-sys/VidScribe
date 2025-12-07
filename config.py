@@ -33,7 +33,7 @@ MAX_VIDEO_DURATION = 45 * 60  # 45 minutes in seconds
 MOTION_THRESHOLD = 30  # Motion detection sensitivity (lower = more sensitive)
 HISTOGRAM_THRESHOLD = 0.7  # Scene change detection (lower = more sensitive)
 MIN_FRAME_INTERVAL = 30  # Minimum frames between keyframes (1 sec at 30fps)
-MAX_KEYFRAMES = 20  # Maximum number of keyframes to extract
+MAX_KEYFRAMES = 8  # Maximum number of keyframes to extract
 
 # ============================================================================
 # AUDIO PROCESSING SETTINGS (Whisper)

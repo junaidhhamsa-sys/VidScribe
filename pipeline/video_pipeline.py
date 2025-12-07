@@ -1,29 +1,31 @@
-"""Main pipeline orchestrating all components"""
+"""Main video processing pipeline"""
 
 import logging
 from pathlib import Path
-from typing import Dict
-import os
+from typing import Dict, Optional
+import time
 
 from core.keyframe_extractor import KeyframeExtractor
 from core.audio_processor import AudioProcessor
-from caption_generator import CaptionGenerator
-from text_summarizer import TextSummarizer
-from generators.ppt_generator import PPTGenerator
-from utils.helpers import cleanup_temp_files, format_time
+from core.gemini_processor import GeminiProcessor
+from generators import PPTGenerator, PDFGenerator
+from utils import VideoValidator, FileHandler, create_progress_message
 import config
 
 logger = logging.getLogger(__name__)
 
 
-class VideoSummarizerPipeline:
-    """Main pipeline for video summarization"""
+class VideoPipeline:
+    """Main pipeline for video processing"""
     
     def __init__(self):
         """Initialize pipeline with all components"""
-        logger.info("Initializing Video Summarizer Pipeline")
+        logger.info("="*70)
+        logger.info("🚀 INITIALIZING VIDEO PROCESSING PIPELINE")
+        logger.info("="*70)
         
         # Initialize components
+        self.validator = VideoValidator()
         self.keyframe_extractor = KeyframeExtractor(
             motion_threshold=config.MOTION_THRESHOLD,
             histogram_threshold=config.HISTOGRAM_THRESHOLD,
@@ -36,73 +38,77 @@ class VideoSummarizerPipeline:
             language=config.WHISPER_LANGUAGE
         )
         
-        self.caption_generator = CaptionGenerator(
-            use_gemini_vision=config.USE_GEMINI_VISION,
+        self.gemini_processor = GeminiProcessor(
             api_key=config.GEMINI_API_KEY,
             model_name=config.GEMINI_MODEL
         )
         
-        self.text_summarizer = TextSummarizer(
-            max_length=config.SUMMARY_MAX_LENGTH
-        )
-        
-        self.ppt_generator = PPTGenerator(
-            title=config.PPT_TITLE,
-            subtitle=config.PPT_SUBTITLE
-        )
-        
-    def process_video(self, video_path: str, output_name: str = None) -> Dict:
+        logger.info("✅ All pipeline components initialized")
+        logger.info("="*70 + "\n")
+    
+    def process_video(self, video_path: str, output_format: str = 'ppt',
+                     ppt_template: str = None, output_name: str = None) -> Dict:
         """
         Process video through complete pipeline
         
         Args:
-            video_path: Path to input video
-            output_name: Name for output files (optional)
+            video_path: Path to input video file
+            output_format: Output format ('ppt', 'pdf', or 'summary')
+            ppt_template: Template name for PPT (only used if format is 'ppt')
+            output_name: Base name for output files (auto-generated if None)
             
         Returns:
             Dictionary with results and file paths
         """
-        logger.info(f"Starting video processing pipeline for: {video_path}")
+        start_time = time.time()
         
-        if not os.path.exists(video_path):
-            raise FileNotFoundError(f"Video file not found: {video_path}")
-        
-        # Generate output name
-        if output_name is None:
-            output_name = Path(video_path).stem
-            
-        # Create temp directory for this video
-        temp_dir = config.TEMP_FOLDER / output_name
-        temp_dir.mkdir(parents=True, exist_ok=True)
-        
-        keyframes_dir = temp_dir / "keyframes"
-        audio_path = temp_dir / "audio.wav"
+        logger.info("\n" + "="*70)
+        logger.info(f"🎬 PROCESSING VIDEO: {Path(video_path).name}")
+        logger.info(f"📊 Output Format: {output_format.upper()}")
+        if output_format == 'ppt':
+            logger.info(f"🎨 Template: {ppt_template or config.DEFAULT_TEMPLATE}")
+        logger.info("="*70)
         
         results = {
             'status': 'processing',
             'video_path': video_path,
-            'output_name': output_name
+            'output_format': output_format,
+            'start_time': start_time
         }
         
         try:
-            # Step 1: Extract keyframes
-            logger.info("Step 1/5: Extracting keyframes...")
-            results['status'] = 'extracting_keyframes'
+            # Step 1: Validate video
+            logger.info(f"\n{create_progress_message(1, 6, 'Validating video')}")
+            is_valid, error = self.validator.validate_file(video_path)
+            if not is_valid:
+                raise ValueError(f"Video validation failed: {error}")
+            
+            video_info = self.validator.get_video_info(video_path)
+            results['video_info'] = video_info
+            logger.info(f"✅ Video valid: {video_info['duration_formatted']}, {video_info['resolution']}")
+            
+            # Generate output name
+            if output_name is None:
+                output_name = Path(video_path).stem
+            
+            # Create temp directory
+            temp_dir = config.TEMP_FOLDER / output_name
+            temp_dir.mkdir(parents=True, exist_ok=True)
+            keyframes_dir = temp_dir / "keyframes"
+            
+            # Step 2: Extract keyframes
+            logger.info(f"\n{create_progress_message(2, 6, 'Extracting keyframes with OpenCV')}")
             keyframes = self.keyframe_extractor.extract_keyframes(
-                video_path, 
+                video_path,
                 str(keyframes_dir)
             )
-            
             keyframe_paths = [kf[1] for kf in keyframes]
-            keyframe_numbers = [kf[0] for kf in keyframes]
-            
-            results['keyframes'] = keyframe_paths
             results['keyframe_count'] = len(keyframes)
-            logger.info(f"Extracted {len(keyframes)} keyframes")
+            logger.info(f"✅ Extracted {len(keyframes)} keyframes")
             
-            # Step 2: Extract and transcribe audio
-            logger.info("Step 2/5: Extracting and transcribing audio...")
-            results['status'] = 'transcribing_audio'
+            # Step 3: Process audio and transcribe
+            logger.info(f"\n{create_progress_message(3, 6, 'Transcribing audio with Whisper')}")
+            audio_path = temp_dir / "audio.wav"
             transcript_data = self.audio_processor.process_video(
                 video_path,
                 str(audio_path)
@@ -110,64 +116,138 @@ class VideoSummarizerPipeline:
             
             results['transcript'] = transcript_data['text']
             results['language'] = transcript_data.get('language', 'unknown')
-            logger.info(f"Transcription complete: {len(transcript_data['text'])} chars")
+            logger.info(f"✅ Transcription complete: {len(transcript_data['text'])} characters")
             
-            # Step 3: Generate captions for keyframes
-            logger.info("Step 3/5: Generating image captions...")
-            results['status'] = 'generating_captions'
-            captions = self.caption_generator.generate_captions_batch(keyframe_paths)
-            
-            results['captions'] = captions
-            logger.info(f"Generated {len(captions)} captions")
-            
-            # Step 4: Create summary
-            logger.info("Step 4/5: Creating summary...")
-            results['status'] = 'summarizing'
-            
-            # Calculate timestamps for keyframes
-            import cv2
-            cap = cv2.VideoCapture(video_path)
-            fps = cap.get(cv2.CAP_PROP_FPS)
-            cap.release()
-            
-            timestamps = [frame_num / fps for frame_num in keyframe_numbers]
-            
-            summary_data = self.text_summarizer.summarize(
-                transcript_data['text'],
-                captions,
-                timestamps
-            )
-            
-            results['summary'] = summary_data['overall_summary']
-            results['slides'] = summary_data['slides']
-            logger.info(f"Created summary with {len(summary_data['slides'])} slides")
-            
-            # Step 5: Generate PowerPoint
-            logger.info("Step 5/5: Generating PowerPoint...")
-            results['status'] = 'generating_ppt'
-            
-            ppt_path = config.OUTPUT_FOLDER / f"{output_name}_summary.pptx"
-            self.ppt_generator.create_presentation(
-                summary_data['slides'],
+            # Step 4: Generate captions for keyframes
+            logger.info(f"\n{create_progress_message(4, 6, 'Generating captions with Gemini AI')}")
+            captions = self.gemini_processor.generate_captions_batch(
                 keyframe_paths,
-                str(ppt_path),
-                summary_data['overall_summary']
+                delay=0.5
+            )
+            results['captions'] = captions
+            logger.info(f"✅ Generated {len(captions)} captions")
+            
+            # Step 5: Create content summary
+            logger.info(f"\n{create_progress_message(5, 6, 'Creating structured summary')}")
+            summary_data = self.gemini_processor.create_content_sections(
+                transcript_data['text'],
+                num_sections=config.PPT_SLIDES_COUNT
             )
             
-            results['ppt_path'] = str(ppt_path)
-            results['status'] = 'complete'
-            logger.info(f"PowerPoint saved to: {ppt_path}")
+            results['title'] = summary_data['title']
+            results['overview'] = summary_data['overview']
+            results['summary'] = summary_data['overview']  # For display
+            logger.info(f"✅ Summary created: '{summary_data['title']}'")
             
-            # Cleanup audio file (keep keyframes for preview)
-            cleanup_temp_files(str(audio_path))
+            # Create slides data
+            slides = []
+            for i, section in enumerate(summary_data['sections']):
+                # Match keyframes to sections
+                keyframe_path = None
+                if i < len(keyframe_paths):
+                    keyframe_path = keyframe_paths[i]
+                
+                slides.append({
+                    'number': i + 1,
+                    'title': section['title'],
+                    'content': '\n'.join(section['content']),
+                    'keyframe_path': keyframe_path
+                })
+            
+            # Add takeaways slide
+            if summary_data.get('takeaways'):
+                slides.append({
+                    'number': len(slides) + 1,
+                    'title': 'Key Takeaways',
+                    'content': '\n'.join(summary_data['takeaways'])
+                })
+            
+            results['slides'] = slides
+            
+            # Step 6: Generate output
+            logger.info(f"\n{create_progress_message(6, 6, f'Generating {output_format.upper()} output')}")
+            
+            if output_format == 'ppt':
+                output_path = self._generate_ppt(
+                    slides, output_name, summary_data, ppt_template
+                )
+                results['output_path'] = output_path
+                results['output_type'] = 'ppt'
+                
+            elif output_format == 'pdf':
+                output_path = self._generate_pdf(
+                    slides, output_name, summary_data
+                )
+                results['output_path'] = output_path
+                results['output_type'] = 'pdf'
+                
+            elif output_format == 'summary':
+                # Summary only - no file generation
+                results['output_type'] = 'summary'
+                results['output_path'] = None
+                logger.info("✅ Summary ready for display")
+            
+            else:
+                raise ValueError(f"Invalid output format: {output_format}")
+            
+            # Cleanup
+            if config.AUTO_DELETE_TEMP:
+                FileHandler.cleanup_temp_files(output_name)
+            
+            if config.AUTO_DELETE_UPLOADS:
+                FileHandler.cleanup_upload(video_path)
+            
+            # Calculate processing time
+            processing_time = time.time() - start_time
+            results['processing_time'] = processing_time
+            results['status'] = 'complete'
+            
+            logger.info("\n" + "="*70)
+            logger.info(f"✅ PROCESSING COMPLETE!")
+            logger.info(f"⏱️  Total time: {processing_time:.2f} seconds")
+            logger.info("="*70 + "\n")
             
             return results
             
         except Exception as e:
-            logger.error(f"Error in pipeline: {e}", exc_info=True)
+            logger.error(f"❌ Pipeline error: {e}", exc_info=True)
             results['status'] = 'error'
             results['error'] = str(e)
             return results
+    
+    def _generate_ppt(self, slides: list, output_name: str, 
+                     summary_data: dict, template: str = None) -> str:
+        """Generate PowerPoint presentation"""
+        
+        generator = PPTGenerator(template_name=template)
+        output_path = config.OUTPUT_FOLDER / f"{output_name}.pptx"
+        
+        generator.create_presentation(
+            slides,
+            str(output_path),
+            title=summary_data['title'],
+            subtitle=summary_data['overview']
+        )
+        
+        logger.info(f"✅ PowerPoint created: {output_path}")
+        return str(output_path)
+    
+    def _generate_pdf(self, slides: list, output_name: str, 
+                     summary_data: dict) -> str:
+        """Generate PDF report"""
+        
+        generator = PDFGenerator()
+        output_path = config.OUTPUT_FOLDER / f"{output_name}.pdf"
+        
+        generator.generate_pdf(
+            slides,
+            str(output_path),
+            title=summary_data['title'],
+            summary=summary_data['overview']
+        )
+        
+        logger.info(f"✅ PDF created: {output_path}")
+        return str(output_path)
 
 
 def main():
@@ -175,30 +255,38 @@ def main():
     import sys
     
     if len(sys.argv) < 2:
-        print("Usage: python pipeline.py <video_path>")
+        print("Usage: python video_pipeline.py <video_path> [output_format] [template]")
+        print("  output_format: ppt (default), pdf, or summary")
+        print("  template: professional (default), educational, minimalist, creative, modern_tech")
         sys.exit(1)
-        
+    
     video_path = sys.argv[1]
+    output_format = sys.argv[2] if len(sys.argv) > 2 else 'ppt'
+    template = sys.argv[3] if len(sys.argv) > 3 else None
     
     # Setup logging
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
+    from utils import setup_logger
+    setup_logger()
     
     # Run pipeline
-    pipeline = VideoSummarizerPipeline()
-    results = pipeline.process_video(video_path)
+    pipeline = VideoPipeline()
+    results = pipeline.process_video(
+        video_path,
+        output_format=output_format,
+        ppt_template=template
+    )
     
     if results['status'] == 'complete':
-        print(f"\n✓ Video processing complete!")
-        print(f"  - Keyframes: {results['keyframe_count']}")
+        print("\n✅ Video processing complete!")
+        print(f"  - Title: {results['title']}")
+        print(f"  - Slides: {len(results['slides'])}")
         print(f"  - Language: {results['language']}")
-        print(f"  - Summary: {results['summary'][:200]}...")
-        print(f"  - PowerPoint: {results['ppt_path']}")
+        print(f"  - Processing time: {results['processing_time']:.2f}s")
+        if results.get('output_path'):
+            print(f"  - Output: {results['output_path']}")
     else:
-        print(f"\n✗ Error: {results.get('error', 'Unknown error')}")
-        
+        print(f"\n❌ Error: {results.get('error', 'Unknown error')}")
+
 
 if __name__ == "__main__":
     main()
