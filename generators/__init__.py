@@ -1,9 +1,10 @@
 """Output generators - PPT and PDF"""
 
-from .ppt_generator import PPTGenerator
-#from .pdf_generator import PDFGenerator
+from .ppt_generator import PPTGenerator, get_available_templates
+from .pdf_generator import PDFGenerator
 
 __all__ = [
     'PPTGenerator',
-    #'PDFGenerator'
+    'PDFGenerator',
+    'get_available_templates'
 ]

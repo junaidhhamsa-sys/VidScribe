@@ -1,4 +1,4 @@
-"""Professional template - Clean corporate style"""
+"""Professional template - Clean corporate style - IMPROVED"""
 
 from pptx.util import Inches, Pt
 from pptx.enum.text import PP_ALIGN
@@ -22,65 +22,65 @@ PROFESSIONAL_TEMPLATE = {
     'fonts': {
         'title': {
             'name': 'Calibri',
-            'size': Pt(44),
+            'size': Pt(40),
             'bold': True,
             'color': 'primary'
         },
         'subtitle': {
             'name': 'Calibri',
-            'size': Pt(24),
+            'size': Pt(20),
             'bold': False,
             'color': 'subtitle'
         },
         'heading': {
             'name': 'Calibri',
-            'size': Pt(32),
+            'size': Pt(28),
             'bold': True,
             'color': 'primary'
         },
         'body': {
             'name': 'Calibri',
-            'size': Pt(18),
+            'size': Pt(16),
             'bold': False,
             'color': 'text'
         },
         'caption': {
             'name': 'Calibri',
-            'size': Pt(14),
+            'size': Pt(12),
             'bold': False,
             'color': 'subtitle'
         }
     },
     
-    # Layout settings
+    # Layout settings - IMPROVED spacing
     'layout': {
         'title_slide': {
             'title_top': Inches(2.5),
             'title_height': Inches(1.5),
             'subtitle_top': Inches(4.2),
-            'subtitle_height': Inches(1.0),
+            'subtitle_height': Inches(1.5),
             'alignment': PP_ALIGN.CENTER
         },
         'content_slide': {
-            'title_top': Inches(0.5),
-            'title_height': Inches(0.8),
-            'image_left': Inches(0.5),
-            'image_top': Inches(1.5),
+            'title_top': Inches(0.3),
+            'title_height': Inches(0.7),
+            'image_left': Inches(0.4),
+            'image_top': Inches(1.2),
             'image_width': Inches(4.5),
-            'image_height': Inches(5.0),
-            'text_left': Inches(5.2),
-            'text_top': Inches(1.5),
-            'text_width': Inches(4.3),
-            'text_height': Inches(5.0),
+            'image_height': Inches(5.8),
+            'text_left': Inches(5.1),
+            'text_top': Inches(1.2),
+            'text_width': Inches(4.5),
+            'text_height': Inches(5.8),
             'has_image': True
         },
         'text_only_slide': {
-            'title_top': Inches(0.5),
-            'title_height': Inches(0.8),
-            'content_left': Inches(1.0),
-            'content_top': Inches(1.8),
-            'content_width': Inches(8.0),
-            'content_height': Inches(5.0)
+            'title_top': Inches(0.3),
+            'title_height': Inches(0.7),
+            'content_left': Inches(0.8),
+            'content_top': Inches(1.5),
+            'content_width': Inches(8.4),
+            'content_height': Inches(5.5)
         }
     },
     
