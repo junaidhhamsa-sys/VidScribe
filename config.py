@@ -46,7 +46,7 @@ WHISPER_LANGUAGE = None  # None = auto-detect language
 # GEMINI API SETTINGS
 # ============================================================================
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")  # Set via .env file
-GEMINI_MODEL = "gemini-2.5-flash-lite"  # Free tier model with video support
+GEMINI_MODEL = "gemini-2.5-flash-live"  # Free tier model with video support  gemma-3-27b,gemini-2.5-flash-live
 GEMINI_TEMPERATURE = 0.7  # Creativity level (0.0 = focused, 1.0 = creative)
 GEMINI_MAX_TOKENS = 2048  # Maximum tokens for summary generation
 
