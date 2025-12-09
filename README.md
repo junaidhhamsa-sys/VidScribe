@@ -147,3 +147,60 @@ Vidscribe-main
 # testing command 
 
 python -m pipeline.video_pipeline "C:\Users\Strix\Downloads\What Is n8n_ The Beginner-Friendly Automation Tool Explained.mp4" ppt professional
+```
+Vidscribe-main
+├─ app.py
+├─ config.py
+├─ core
+│  ├─ audio_processor.py
+│  ├─ gemini_processor.py
+│  ├─ keyframe_extractor.py
+│  └─ __init__.py
+├─ docs
+│  ├─ API_REFERENCE.md
+│  ├─ edu5.pdf
+│  ├─ GEMINI_SETUP.md
+│  ├─ LOGGING_INFO.md
+│  ├─ QUICKSTART.md
+│  └─ WORKFLOW.md
+├─ generators
+│  ├─ pdf_generator.py
+│  ├─ ppt_generator.py
+│  ├─ ppt_templates
+│  │  ├─ creative.py
+│  │  ├─ educational.py
+│  │  ├─ minimalist.py
+│  │  ├─ modern_tech.py
+│  │  ├─ professional.py
+│  │  └─ __init__.py
+│  └─ __init__.py
+├─ pipeline
+│  ├─ video_pipeline.py
+│  └─ __init__.py
+├─ README.md
+├─ requirements.txt
+├─ start.sh
+├─ static
+│  ├─ css
+│  │  └─ style.css
+│  ├─ images
+│  │  ├─ logo.png
+│  │  └─ templates
+│  │     ├─ creative.png
+│  │     ├─ educational.png
+│  │     ├─ minimalist.png
+│  │     ├─ modern_tech.png
+│  │     └─ professional.png
+│  └─ js
+│     └─ script.js
+├─ templates
+│  └─ index.html
+├─ test files
+└─ utils
+   ├─ file_handler.py
+   ├─ helpers.py
+   ├─ logger.py
+   ├─ validators.py
+   └─ __init__.py
+
+```
