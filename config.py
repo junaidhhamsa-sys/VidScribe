@@ -33,20 +33,20 @@ MAX_VIDEO_DURATION = 45 * 60  # 45 minutes in seconds
 MOTION_THRESHOLD = 30  # Motion detection sensitivity (lower = more sensitive)
 HISTOGRAM_THRESHOLD = 0.7  # Scene change detection (lower = more sensitive)
 MIN_FRAME_INTERVAL = 30  # Minimum frames between keyframes (1 sec at 30fps)
-MAX_KEYFRAMES = 8  # Maximum number of keyframes to extract
+MAX_KEYFRAMES = 5  # Maximum number of keyframes to extract
 
 # ============================================================================
 # AUDIO PROCESSING SETTINGS (Whisper)
 # ============================================================================
-WHISPER_MODEL = "base"  # Options: tiny, base, small, medium, large
+WHISPER_MODEL = "medium"  # Options: tiny, base, small, medium, large
 # "base" is good balance of speed and accuracy for 45-min videos
-WHISPER_LANGUAGE = None  # None = auto-detect language
+WHISPER_LANGUAGE = "en"  # None = auto-detect language
 
 # ============================================================================
 # GEMINI API SETTINGS
 # ============================================================================
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")  # Set via .env file
-GEMINI_MODEL = "gemini-2.5-flash-live"  # Free tier model with video support  gemma-3-27b,gemini-2.5-flash-live
+GEMINI_MODEL = "gemini-2.5-flash"  # Free tier model with video support  gemma-3-27b,gemini-2.5-flash-live
 GEMINI_TEMPERATURE = 0.7  # Creativity level (0.0 = focused, 1.0 = creative)
 GEMINI_MAX_TOKENS = 2048  # Maximum tokens for summary generation
 
@@ -69,7 +69,8 @@ SUMMARY_STYLE = "concise"  # Options: concise, detailed, bullet_points
 PPT_SLIDES_COUNT = 8  # Number of content slides (excluding title)
 PPT_INCLUDE_TIMESTAMPS = True  # Show timestamps on slides
 PPT_INCLUDE_KEYFRAMES = True  # Include keyframe images in slides
-
+PPT_TITLE = "Video Summary"  # Default presentation title
+PPT_SUBTITLE = "AI Video Summary"
 # PDF Settings
 PDF_INCLUDE_IMAGES = True  # Include keyframe images in PDF
 PDF_PAGE_SIZE = "A4"  # A4 or Letter
@@ -112,12 +113,12 @@ DEFAULT_TEMPLATE = 'professional'  # Default template if none selected
 # PROCESSING SETTINGS
 # ============================================================================
 # Content Selection (for focused presentations)
-SELECT_KEY_VISUALS = True  # Only include most relevant keyframes
+SELECT_KEY_VISUALS = False  # Disabled to save API calls - only include most relevant keyframes
 VISUAL_SELECTION_METHOD = "gemini"  # Options: gemini, diversity, time_based
 
 # Cleanup Settings
 AUTO_DELETE_UPLOADS = True  # Delete uploaded videos after processing
-AUTO_DELETE_TEMP = True  # Delete temporary files after processing
+AUTO_DELETE_TEMP = True  # Keep temp files so keyframes can be saved
 KEEP_OUTPUTS_HOURS = 24  # Keep generated files for 24 hours
 
 # ============================================================================

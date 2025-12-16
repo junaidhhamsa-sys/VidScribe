@@ -118,14 +118,16 @@ class VideoPipeline:
             results['language'] = transcript_data.get('language', 'unknown')
             logger.info(f"✅ Transcription complete: {len(transcript_data['text'])} characters")
             
-            # Step 4: Generate captions for keyframes
-            logger.info(f"\n{create_progress_message(4, 6, 'Generating captions with Gemini AI')}")
-            captions = self.gemini_processor.generate_captions_batch(
-                keyframe_paths,
-                delay=0.5
-            )
-            results['captions'] = captions
-            logger.info(f"✅ Generated {len(captions)} captions")
+            # Step 4: Generate captions for keyframes - DISABLED TO SAVE API CALLS
+            logger.info(f"\n{create_progress_message(4, 6, 'Skipping captions (API optimization)')}")
+            # COMMENTED OUT TO SAVE 8 API CALLS PER VIDEO:
+            # captions = self.gemini_processor.generate_captions_batch(
+            #     keyframe_paths,
+            #     delay=0.5
+            # )
+            # results['captions'] = captions
+            results['captions'] = []  # Empty - using transcript only
+            logger.info(f"⚡ Skipped image captions to save API calls")
             
             # Step 5: Create content summary
             logger.info(f"\n{create_progress_message(5, 6, 'Creating structured summary')}")
@@ -173,6 +175,7 @@ class VideoPipeline:
                 )
                 results['output_path'] = output_path
                 results['output_type'] = 'ppt'
+                results['template'] = ppt_template or config.DEFAULT_TEMPLATE
                 
             elif output_format == 'pdf':
                 output_path = self._generate_pdf(

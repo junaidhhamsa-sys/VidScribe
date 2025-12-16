@@ -215,37 +215,39 @@ class GeminiProcessor:
                 
                 # Default prompt
                 prompt = custom_prompt or f"""
-                You are analyzing a video. Below is the audio transcript and descriptions of key visual moments.
-                
+                You are generating a structured analysis of a video that will be converted into a presentation. 
+                Use a clear, educational tone similar to Google NotebookLM auto-generated reports.
+
+                Use this format:
+
+                TITLE:
+                Write a concise 5–10 word title.
+
+                OVERVIEW:
+                Write a 2–3 sentence explanation of the video's purpose and main idea.
+
+                MAIN SECTIONS:
+                Create 4–6 section headers with 2–3 sentences each describing:
+                - The concept
+                - Why it matters
+                - How it fits into the topic
+
+                KEY POINTS:
+                List 5–8 important takeaways.
+
+                DETAILED SLIDE-READY SUMMARY:
+                Write a clear, structured breakdown that matches how slides would be designed. 
+                For each conceptual group, include:
+                - A short descriptive paragraph
+                - 3–5 concise bullet points
+
+                Ensure the tone and structure resemble a professional educational presentation.
+
                 AUDIO TRANSCRIPT:
                 {transcript}
-                
+
                 VISUAL DESCRIPTIONS:
                 {visual_content}
-                
-                Please provide:
-                
-                1. **Title**: A concise, descriptive title for this video (max 10 words)
-                
-                2. **Overview**: A 2-3 sentence summary of the main topic and purpose (max 100 words)
-                
-                3. **Key Points**: List 5-8 main points covered in the video as bullet points
-                
-                4. **Detailed Summary**: A comprehensive summary organized into clear sections (max 400 words)
-                
-                Format your response as:
-                
-                TITLE: [title here]
-                
-                OVERVIEW: [overview here]
-                
-                KEY POINTS:
-                - [point 1]
-                - [point 2]
-                ...
-                
-                DETAILED SUMMARY:
-                [detailed summary here]
                 """
                 
                 # Generate summary
@@ -306,37 +308,63 @@ class GeminiProcessor:
         while retry_count < max_retries:
             try:
                 prompt = f"""
-                Analyze this video transcript and create a structured presentation with {num_sections} main content sections.
+                You are creating a CONCISE, POINT-WISE presentation from a video transcript.
+                
+                CRITICAL RULES:
+                - Each slide should have 5-7 bullet points MAXIMUM
+                - NO long paragraphs - only short, punchy bullet points
+                - Each bullet point should be 10-15 words max
+                - Be direct and concise
+                - Focus on KEY information only
+                
+                Create {num_sections} slides using this EXACT format:
+                
+                TITLE:
+                [One short, clear title (max 10 words)]
+                
+                OVERVIEW:
+                [2-3 sentence summary of the entire topic - must be SHORT]
+                
+                SLIDE 1: Introduction
+                - [Key point 1]
+                - [Key point 2]
+                - [Key point 3]
+                - [Key point 4]
+                - [Key point 5]
+                
+                SLIDE 2: [Topic Name]
+                - [Key point 1]
+                - [Key point 2]
+                - [Key point 3]
+                - [Key point 4]
+                - [Key point 5]
+                - [Key point 6]
+                
+                SLIDE 3: [Topic Name]
+                - [Key point 1]
+                - [Key point 2]
+                - [Key point 3]
+                - [Key point 4]
+                - [Key point 5]
+                
+                [Continue for remaining slides...]
+                
+                SLIDE {num_sections}: Key Takeaways
+                - [Takeaway 1]
+                - [Takeaway 2]
+                - [Takeaway 3]
+                - [Takeaway 4]
+                - [Takeaway 5]
+                
+                IMPORTANT:
+                - NO paragraphs or long descriptions
+                - ONLY bullet points (5-7 max per slide)
+                - Keep each bullet SHORT and impactful
+                - Use action words and clear language
+                - Focus on practical, memorable points
                 
                 TRANSCRIPT:
                 {transcript}
-                
-                Provide:
-                1. A catchy title (max 10 words)
-                2. A brief overview (2-3 sentences)
-                3. {num_sections} main content sections, each with:
-                   - A section title (3-6 words)
-                   - 3-5 bullet points explaining the key information
-                4. 3-5 key takeaways from the entire content
-                
-                Format as:
-                
-                TITLE: [title]
-                
-                OVERVIEW: [overview]
-                
-                SECTION 1: [title]
-                - [bullet point 1]
-                - [bullet point 2]
-                ...
-                
-                SECTION 2: [title]
-                ...
-                
-                KEY TAKEAWAYS:
-                - [takeaway 1]
-                - [takeaway 2]
-                ...
                 """
                 
                 response = self.model.generate_content(prompt)
@@ -441,7 +469,7 @@ class GeminiProcessor:
             return list(range(0, len(captions), step))[:num_visuals]
     
     def _parse_summary_response(self, text: str) -> Dict[str, any]:
-        """Parse structured summary response"""
+        """Parse structured summary response - supports multiple formats"""
         result = {
             'title': 'Video Summary',
             'overview': '',
@@ -461,13 +489,14 @@ class GeminiProcessor:
                 elif line.startswith('OVERVIEW:'):
                     result['overview'] = line.replace('OVERVIEW:', '').strip()
                     current_section = 'overview'
-                elif line.startswith('KEY POINTS:'):
+                # Support both old and new section headers
+                elif line.startswith(('KEY POINTS:', 'MAIN SECTIONS:')):
                     current_section = 'key_points'
-                elif line.startswith('DETAILED SUMMARY:'):
+                elif line.startswith(('DETAILED SUMMARY:', 'DETAILED SLIDE-READY SUMMARY:')):
                     current_section = 'detailed_summary'
                 elif line.startswith('- ') and current_section == 'key_points':
                     result['key_points'].append(line[2:].strip())
-                elif current_section == 'overview' and line and not line.startswith(('TITLE:', 'KEY POINTS:')):
+                elif current_section == 'overview' and line and not line.startswith(('TITLE:', 'KEY POINTS:', 'MAIN SECTIONS:')):
                     result['overview'] += ' ' + line
                 elif current_section == 'detailed_summary' and line:
                     result['detailed_summary'] += line + '\n'
@@ -481,7 +510,7 @@ class GeminiProcessor:
         return result
     
     def _parse_sections_response(self, text: str) -> Dict:
-        """Parse structured sections response"""
+        """Parse structured sections response - supports both SLIDE X: and SECTION X: formats"""
         result = {
             'title': 'Content Summary',
             'overview': '',
@@ -493,6 +522,7 @@ class GeminiProcessor:
             lines = text.split('\n')
             current_section = None
             current_section_data = None
+            current_paragraph = []
             
             for line in lines:
                 line = line.strip()
@@ -501,25 +531,47 @@ class GeminiProcessor:
                     result['title'] = line.replace('TITLE:', '').strip()
                 elif line.startswith('OVERVIEW:'):
                     result['overview'] = line.replace('OVERVIEW:', '').strip()
-                elif line.startswith('SECTION '):
+                # Support both SLIDE X: and SECTION X: formats
+                elif line.startswith(('SLIDE ', 'SECTION ')):
+                    # Save previous section if exists
                     if current_section_data:
+                        # Add any pending paragraph content
+                        if current_paragraph:
+                            current_section_data['content'].append(' '.join(current_paragraph))
+                            current_paragraph = []
                         result['sections'].append(current_section_data)
+                    
+                    # Extract title after the colon
                     title = line.split(':', 1)[1].strip() if ':' in line else line
                     current_section_data = {'title': title, 'content': []}
                 elif line.startswith('KEY TAKEAWAYS:'):
+                    # Save current section before processing takeaways
                     if current_section_data:
+                        if current_paragraph:
+                            current_section_data['content'].append(' '.join(current_paragraph))
+                            current_paragraph = []
                         result['sections'].append(current_section_data)
                         current_section_data = None
                     current_section = 'takeaways'
                 elif line.startswith('- '):
+                    # Bullet point
                     content = line[2:].strip()
                     if current_section == 'takeaways':
                         result['takeaways'].append(content)
                     elif current_section_data:
+                        # Flush paragraph if exists before adding bullet
+                        if current_paragraph:
+                            current_section_data['content'].append(' '.join(current_paragraph))
+                            current_paragraph = []
                         current_section_data['content'].append(content)
+                elif line and current_section_data:
+                    # Regular paragraph text - accumulate it
+                    current_paragraph.append(line)
             
-            # Add last section
+            # Add final pending content
             if current_section_data:
+                if current_paragraph:
+                    current_section_data['content'].append(' '.join(current_paragraph))
                 result['sections'].append(current_section_data)
             
         except Exception as e:

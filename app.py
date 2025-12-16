@@ -1,6 +1,6 @@
 """Flask application for video summarization"""
 
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for
 from werkzeug.utils import secure_filename
 import os
 import logging
@@ -138,6 +138,48 @@ def process_video_background(video_path: str, output_format: str,
         processing_results[output_name] = results
         
         if results['status'] == 'complete':
+            # Auto-save results to JSON for reuse
+            try:
+                import json
+                import shutil
+                
+                saved_dir = Path(__file__).parent / "saved_results"
+                saved_dir.mkdir(exist_ok=True)
+                saved_path = saved_dir / f"{output_name}.json"
+                
+                # Save JSON data
+                with open(saved_path, 'w', encoding='utf-8') as f:
+                    json.dump(results, f, indent=2, ensure_ascii=False)
+                
+                # Save keyframe images
+                keyframes_saved_dir = saved_dir / f"{output_name}_keyframes"
+                keyframes_saved_dir.mkdir(exist_ok=True)
+                
+                if results.get('slides'):
+                    saved_count = 0
+                    for slide in results['slides']:
+                        if slide.get('keyframe_path'):
+                            src_path = Path(slide['keyframe_path'])
+                            if src_path.exists():
+                                dst_path = keyframes_saved_dir / src_path.name
+                                shutil.copy2(src_path, dst_path)
+                                # Update path in results to point to saved location
+                                slide['keyframe_path'] = str(dst_path)
+                                saved_count += 1
+                    
+                    # Re-save JSON with updated keyframe paths
+                    with open(saved_path, 'w', encoding='utf-8') as f:
+                        json.dump(results, f, indent=2, ensure_ascii=False)
+                    
+                    logger.info(f"💾 Auto-saved results to: {saved_path}")
+                    logger.info(f"   Saved {saved_count} keyframe images")
+                else:
+                    logger.info(f"💾 Auto-saved results to: {saved_path}")
+                
+                logger.info(f"   Reuse via: http://localhost:{config.FLASK_PORT}/saved/{output_name}")
+            except Exception as e:
+                logger.warning(f"Failed to auto-save results: {e}")
+            
             processing_status[output_name] = {
                 'status': 'complete',
                 'progress': 100,
@@ -229,6 +271,170 @@ def list_templates():
     return jsonify({'templates': templates})
 
 
+@app.route('/results/<output_name>')
+def show_results(output_name):
+    """Display results page with presentation and template selection"""
+    
+    # Check if results exist
+    if output_name not in processing_results:
+        return render_template('index.html', 
+                             templates=get_available_templates(), 
+                             config=config,
+                             error='Results not found'), 404
+    
+    results = processing_results[output_name]
+    
+    # Check if processing is complete
+    if results['status'] != 'complete':
+        return render_template('index.html',
+                             templates=get_available_templates(),
+                             config=config,
+                             error='Processing not complete'), 400
+    
+    # Debug logging
+    logger.info(f"Results keys: {results.keys()}")
+    logger.info(f"Number of slides: {len(results.get('slides', []))}")
+    if results.get('slides'):
+        logger.info(f"First slide: {results['slides'][0]}")
+    
+    # Get presentation details
+    presentation_data = {
+        'title': results.get('title', 'Video Summary'),
+        'summary': results.get('summary', ''),
+        'slides': results.get('slides', []),
+        'slides_count': len(results.get('slides', [])),
+        'output_path': results.get('output_path'),
+        'template': results.get('template', config.DEFAULT_TEMPLATE)
+    }
+    
+    logger.info(f"Passing {presentation_data['slides_count']} slides to template")
+    
+    return render_template('results.html',
+                         presentation_title=presentation_data['title'],
+                         slides=presentation_data['slides'],
+                         slides_count=presentation_data['slides_count'],
+                         output_name=output_name,
+                         selected_template=presentation_data['template'])
+
+
+@app.route('/test-results')
+def test_results():
+    """Test endpoint with dummy data for results page preview"""
+    
+    # Create dummy data for testing
+    test_output_name = 'test_demo'
+    
+    # Mock slides data
+    dummy_slides = [
+        {
+            'number': 1,
+            'title': 'Introduction to AI',
+            'content': 'Artificial Intelligence is transforming the world.\nMachine learning enables computers to learn from data.\nDeep learning uses neural networks for complex tasks.',
+            'keyframe_path': None
+        },
+        {
+            'number': 2,
+            'title': 'Machine Learning Basics',
+            'content': 'Supervised learning uses labeled data.\nUnsupervised learning finds patterns.\nReinforcement learning learns through rewards.',
+            'keyframe_path': None
+        },
+        {
+            'number': 3,
+            'title': 'Neural Networks',
+            'content': 'Neurons process information in layers.\nActivation functions introduce non-linearity.\nBackpropagation trains the network.',
+            'keyframe_path': None
+        },
+        {
+            'number': 4,
+            'title': 'Deep Learning Applications',
+            'content': 'Computer vision for image recognition.\nNatural language processing for text.\nSpeech recognition and generation.',
+            'keyframe_path': None
+        },
+        {
+            'number': 5,
+            'title': 'Future of AI',
+            'content': 'AI will continue to advance rapidly.\nEthical considerations are crucial.\nHuman-AI collaboration is the future.',
+            'keyframe_path': None
+        },
+        {
+            'number': 6,
+            'title': 'Conclusion',
+            'content': 'AI is reshaping every industry.\nContinuous learning is essential.\nThe future is intelligent and exciting.',
+            'keyframe_path': None
+        }
+    ]
+    
+    # Create dummy results
+    processing_results[test_output_name] = {
+        'status': 'complete',
+        'title': 'AI & Machine Learning: A Complete Guide',
+        'summary': 'This presentation covers the fundamentals of artificial intelligence and machine learning, including neural networks, deep learning applications, and the future of AI technology.',
+        'slides': dummy_slides,
+        'output_path': '/dummy/path/presentation.pptx',
+        'template': 'professional',
+        'output_type': 'ppt',
+        'processing_time': 45.2,
+        'language': 'en'
+    }
+    
+    # Also set processing status
+    processing_status[test_output_name] = {
+        'status': 'complete',
+        'progress': 100,
+        'message': 'Processing complete!'
+    }
+    
+    # Redirect to results page
+    from flask import redirect, url_for
+    return redirect(url_for('show_results', output_name=test_output_name))
+
+
+@app.route('/saved/<filename>')
+def show_saved_results(filename):
+    """Load and display saved results from JSON file (no API usage)"""
+    import json
+    
+    # Load saved results
+    saved_path = Path(__file__).parent / "saved_results" / f"{filename}.json"
+    
+    logger.info(f"🔍 Attempting to load saved results: {filename}")
+    logger.info(f"   Looking for file: {saved_path}")
+    logger.info(f"   File exists: {saved_path.exists()}")
+    
+    if not saved_path.exists():
+        logger.error(f"❌ File not found: {saved_path}")
+        return render_template('index.html',
+                             templates=get_available_templates(),
+                             config=config,
+                             error=f'Saved result not found: {filename}'), 404
+    
+    try:
+        with open(saved_path, 'r', encoding='utf-8') as f:
+            results = json.load(f)
+        
+        # Load into memory so it can be accessed by other routes
+        processing_results[filename] = results
+        processing_status[filename] = {
+            'status': 'complete',
+            'progress': 100,
+            'message': 'Loaded from saved results'
+        }
+        
+        logger.info(f"✅ Loaded saved results: {filename}")
+        logger.info(f"   - Slides: {len(results.get('slides', []))}")
+        
+        # Redirect to results page
+        return redirect(url_for('show_results', output_name=filename))
+        
+    except Exception as e:
+        logger.error(f"Error loading saved results: {e}")
+        return render_template('index.html',
+                             templates=get_available_templates(),
+                             config=config,
+                             error=f'Error loading results: {str(e)}'), 500
+
+
+
 @app.route('/cleanup', methods=['POST'])
 def cleanup():
     """Cleanup old files"""
@@ -238,6 +444,26 @@ def cleanup():
     except Exception as e:
         logger.error(f"Cleanup error: {e}")
         return jsonify({'error': str(e)}), 500
+
+
+@app.route('/temp/<path:filename>')
+def serve_temp_file(filename):
+    """Serve files from temp folder or saved_results (keyframes, etc)"""
+    try:
+        # First try temp folder (for currently processing videos)
+        temp_path = config.TEMP_FOLDER / filename
+        if temp_path.exists():
+            return send_file(str(temp_path))
+        
+        # Then try saved_results folder (for saved keyframes)
+        saved_path = Path(__file__).parent / "saved_results" / filename
+        if saved_path.exists():
+            return send_file(str(saved_path))
+        
+        return "File not found", 404
+    except Exception as e:
+        logger.error(f"Error serving temp file: {e}")
+        return "Error serving file", 500
 
 
 @app.errorhandler(413)

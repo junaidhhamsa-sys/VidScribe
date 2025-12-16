@@ -35,15 +35,15 @@ document.addEventListener('DOMContentLoaded', () => {
 function initializeEventListeners() {
     // File input change
     videoFileInput.addEventListener('change', handleFileSelect);
-    
+
     // Form submit
     uploadForm.addEventListener('submit', handleFormSubmit);
-    
+
     // Output format change
     outputFormatRadios.forEach(radio => {
         radio.addEventListener('change', handleFormatChange);
     });
-    
+
     // Action buttons
     downloadBtn.addEventListener('click', handleDownload);
     newVideoBtn.addEventListener('click', resetApp);
@@ -68,23 +68,23 @@ function handleImageError(img) {
 
 function handleFileSelect(event) {
     const file = event.target.files[0];
-    
+
     if (file) {
         // Update display
         fileNameDisplay.textContent = file.name;
         fileLabel.classList.add('has-file');
-        
+
         // Show file info
         const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
         fileNameDisplay.textContent = `${file.name} (${sizeMB} MB)`;
-        
+
         console.log('File selected:', file.name);
     }
 }
 
 function handleFormatChange(event) {
     const format = event.target.value;
-    
+
     // Show/hide template selection based on format
     if (format === 'ppt') {
         templateSelection.style.display = 'block';
@@ -99,34 +99,34 @@ function handleFormatChange(event) {
 
 async function handleFormSubmit(event) {
     event.preventDefault();
-    
+
     const formData = new FormData(uploadForm);
     const file = videoFileInput.files[0];
-    
+
     if (!file) {
         showError('Please select a video file');
         return;
     }
-    
+
     // Disable submit button
     uploadBtn.disabled = true;
     uploadBtn.innerHTML = '<span>⏳ Uploading...</span>';
-    
+
     try {
         const response = await fetch('/upload', {
             method: 'POST',
             body: formData
         });
-        
+
         const data = await response.json();
-        
+
         if (response.ok) {
             // Store output name
             currentOutputName = data.output_name;
-            
+
             // Show processing section
             showProcessingSection(data.video_info);
-            
+
             // Start status checking
             startStatusChecking();
         } else {
@@ -148,10 +148,10 @@ async function handleFormSubmit(event) {
 function showProcessingSection(videoInfo) {
     // Hide upload section
     uploadSection.classList.add('hidden');
-    
+
     // Show processing section
     processingSection.classList.remove('hidden');
-    
+
     // Display video info
     const videoInfoDiv = document.getElementById('videoInfo');
     videoInfoDiv.innerHTML = `
@@ -164,24 +164,25 @@ function showProcessingSection(videoInfo) {
 function startStatusChecking() {
     // Check immediately
     checkStatus();
-    
+
     // Then check every 2 seconds
     statusCheckInterval = setInterval(checkStatus, 2000);
 }
 
 async function checkStatus() {
     if (!currentOutputName) return;
-    
+
     try {
         const response = await fetch(`/status/${currentOutputName}`);
         const data = await response.json();
-        
+
         if (response.ok) {
             updateProcessingStatus(data);
-            
+
             if (data.status === 'complete') {
                 stopStatusChecking();
-                showResults(data.results);
+                // Redirect to the new results page
+                window.location.href = `/results/${currentOutputName}`;
             } else if (data.status === 'error') {
                 stopStatusChecking();
                 showError(data.message);
@@ -196,23 +197,23 @@ function updateProcessingStatus(data) {
     // Update progress bar
     const progressFill = document.getElementById('progressFill');
     const progressText = document.getElementById('progressText');
-    
+
     progressFill.style.width = `${data.progress}%`;
     progressText.textContent = data.message;
-    
+
     // Update steps (simplified - you can enhance this)
     updateSteps(data.progress);
 }
 
 function updateSteps(progress) {
     const steps = document.querySelectorAll('.step');
-    
+
     // Simple progress mapping
     const stepProgress = [0, 16, 33, 50, 66, 83, 100];
-    
+
     steps.forEach((step, index) => {
         const stepIcon = step.querySelector('.step-icon');
-        
+
         if (progress >= stepProgress[index + 1]) {
             step.classList.add('complete');
             step.classList.remove('active');
@@ -238,10 +239,10 @@ function stopStatusChecking() {
 function showResults(results) {
     // Hide processing section
     processingSection.classList.add('hidden');
-    
+
     // Show results section
     resultsSection.classList.remove('hidden');
-    
+
     // Display results info
     const resultsInfo = document.getElementById('resultsInfo');
     resultsInfo.innerHTML = `
@@ -262,7 +263,7 @@ function showResults(results) {
             <span>${results.processing_time.toFixed(1)}s</span>
         </div>
     `;
-    
+
     // Display summary
     const summaryBox = document.getElementById('summaryBox');
     if (results.summary) {
@@ -273,7 +274,7 @@ function showResults(results) {
     } else {
         summaryBox.style.display = 'none';
     }
-    
+
     // Setup download button
     if (results.output_type !== 'summary') {
         downloadBtn.style.display = 'inline-flex';
@@ -292,14 +293,14 @@ function showError(message) {
     uploadSection.classList.add('hidden');
     processingSection.classList.add('hidden');
     resultsSection.classList.add('hidden');
-    
+
     // Show error section
     errorSection.classList.remove('hidden');
-    
+
     // Display error message
     const errorMessage = document.getElementById('errorMessage');
     errorMessage.textContent = message;
-    
+
     console.error('Error:', message);
 }
 
@@ -312,7 +313,7 @@ function handleDownload() {
         showError('No output available for download');
         return;
     }
-    
+
     // Download file
     window.location.href = `/download/${currentOutputName}`;
 }
@@ -324,26 +325,26 @@ function handleDownload() {
 function resetApp() {
     // Stop status checking
     stopStatusChecking();
-    
+
     // Reset current output
     currentOutputName = null;
-    
+
     // Hide all sections
     processingSection.classList.add('hidden');
     resultsSection.classList.add('hidden');
     errorSection.classList.add('hidden');
-    
+
     // Show upload section
     uploadSection.classList.remove('hidden');
-    
+
     // Reset form
     uploadForm.reset();
     fileNameDisplay.textContent = 'Choose video file...';
     fileLabel.classList.remove('has-file');
-    
+
     // Reset template selection visibility
     templateSelection.style.display = 'block';
-    
+
     // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -360,11 +361,11 @@ function truncateText(text, maxLength) {
 
 function formatBytes(bytes) {
     if (bytes === 0) return '0 Bytes';
-    
+
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
+
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
 }
 
