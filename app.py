@@ -54,9 +54,11 @@ def upload_video():
     
     # Get form parameters
     output_format = request.form.get('output_format', 'ppt')
-    template = request.form.get('template', config.DEFAULT_TEMPLATE)
+    # Template selection happens on results page, use default for initial processing
+    template = request.form.get('ppt_template', config.DEFAULT_TEMPLATE)
     
     logger.info(f"Upload details: format={output_format}, template={template}")
+
     
     try:
         # Save uploaded file
@@ -243,7 +245,7 @@ def download_file(output_name):
     if not output_path or not os.path.exists(output_path):
         return jsonify({'error': 'File not found'}), 404
     
-    # Determine mimetype
+    # Determine mimetype and extension
     output_type = results.get('output_type', 'ppt')
     if output_type == 'ppt':
         mimetype = 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
@@ -254,14 +256,24 @@ def download_file(output_name):
     else:
         return jsonify({'error': 'Invalid output type'}), 400
     
-    filename = f"{output_name}_summary{ext}"
+    # Use a cleaner filename from the actual file, not the output_name
+    filename = Path(output_path).name
     
-    return send_file(
+    # Ensure the filename has the proper extension
+    if not filename.endswith(ext):
+        filename = f"{Path(filename).stem}{ext}"
+    
+    response = send_file(
         output_path,
         as_attachment=True,
         download_name=filename,
         mimetype=mimetype
     )
+    
+    # Explicitly set Content-Disposition header to ensure proper filename
+    response.headers["Content-Disposition"] = f'attachment; filename="{filename}"'
+    
+    return response
 
 
 @app.route('/templates')
@@ -269,6 +281,74 @@ def list_templates():
     """Get available templates"""
     templates = get_available_templates()
     return jsonify({'templates': templates})
+
+
+@app.route('/regenerate-ppt/<output_name>', methods=['POST'])
+def regenerate_ppt(output_name):
+    """Regenerate PPT with different template (no API calls, uses cached data)"""
+    
+    try:
+        # Get requested template from request body
+        data = request.get_json()
+        new_template = data.get('template', config.DEFAULT_TEMPLATE)
+        
+        logger.info(f"🔄 Regenerating PPT for '{output_name}' with template '{new_template}'")
+        
+        # Check if results exist in memory or load from saved JSON
+        if output_name not in processing_results:
+            # Try loading from saved_results
+            saved_path = Path(__file__).parent / "saved_results" / f"{output_name}.json"
+            if saved_path.exists():
+                import json
+                with open(saved_path, 'r', encoding='utf-8') as f:
+                    results = json.load(f)
+                processing_results[output_name] = results
+                logger.info(f"✅ Loaded cached results from {saved_path}")
+            else:
+                return jsonify({'error': 'Results not found'}), 404
+        
+        results = processing_results[output_name]
+        
+        # Verify results are complete
+        if results['status'] != 'complete':
+            return jsonify({'error': 'Processing not complete'}), 400
+        
+        # Import PPTGenerator
+        from generators.ppt_generator import PPTGenerator
+        
+        # Generate new filename with template name
+        timestamp = Path(results.get('output_path', '')).stem.split('_')[-1] if results.get('output_path') else 'regenerated'
+        new_filename = f"{output_name}_{new_template}_{timestamp}.pptx"
+        new_output_path = config.OUTPUT_FOLDER / new_filename
+        
+        # Create PPT with new template using cached slides data
+        generator = PPTGenerator(template_name=new_template)
+        generator.create_presentation(
+            slides_data=results.get('slides', []),
+            output_path=str(new_output_path),
+            title=results.get('title', 'Video Summary'),
+            subtitle=results.get('summary', '')[:120] if results.get('summary') else None
+        )
+        
+        # Update results with new template and output path
+        results['template'] = new_template
+        results['output_path'] = str(new_output_path)
+        
+        logger.info(f"✅ Regenerated PPT: {new_output_path}")
+        logger.info(f"   Template: {new_template}")
+        logger.info(f"   No Gemini API calls made! 🎉")
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'PPT regenerated successfully',
+            'template': new_template,
+            'output_path': new_filename,
+            'download_url': f'/download/{output_name}'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error regenerating PPT: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
 
 
 @app.route('/results/<output_name>')
@@ -412,6 +492,13 @@ def show_saved_results(filename):
         with open(saved_path, 'r', encoding='utf-8') as f:
             results = json.load(f)
         
+        # Check if referenced template exists, fallback to default if not
+        if 'template' in results:
+            template_path = Path(__file__).parent / 'generators' / 'templates' / f"{results['template']}.pptx"
+            if not template_path.exists():
+                logger.warning(f"Template '{results['template']}.pptx' not found, using default: {config.DEFAULT_TEMPLATE}")
+                results['template'] = config.DEFAULT_TEMPLATE
+        
         # Load into memory so it can be accessed by other routes
         processing_results[filename] = results
         processing_status[filename] = {
@@ -425,6 +512,7 @@ def show_saved_results(filename):
         
         # Redirect to results page
         return redirect(url_for('show_results', output_name=filename))
+
         
     except Exception as e:
         logger.error(f"Error loading saved results: {e}")

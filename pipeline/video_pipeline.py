@@ -8,7 +8,7 @@ import time
 from core.keyframe_extractor import KeyframeExtractor
 from core.audio_processor import AudioProcessor
 from core.gemini_processor import GeminiProcessor
-from generators import PPTGenerator, PDFGenerator
+from generators import PPTGenerator
 from utils import VideoValidator, FileHandler, create_progress_message
 import config
 
@@ -143,11 +143,23 @@ class VideoPipeline:
             
             # Create slides data
             slides = []
+            num_sections = len(summary_data['sections'])
+            num_keyframes = len(keyframe_paths)
+            
+            # Calculate which slides should get keyframes (evenly spaced)
+            keyframe_indices = []
+            if num_keyframes > 0 and num_sections > 0:
+                # Distribute keyframes evenly: e.g., 8 slides, 5 keyframes → [0, 2, 4, 6, 7]
+                step = num_sections / num_keyframes
+                keyframe_indices = [int(i * step) for i in range(num_keyframes)]
+                logger.info(f"📸 Distributing {num_keyframes} keyframes evenly: slides {keyframe_indices}")
+            
             for i, section in enumerate(summary_data['sections']):
-                # Match keyframes to sections
+                # Assign keyframe if this slide index is in the distribution
                 keyframe_path = None
-                if i < len(keyframe_paths):
-                    keyframe_path = keyframe_paths[i]
+                if i in keyframe_indices:
+                    keyframe_idx = keyframe_indices.index(i)
+                    keyframe_path = keyframe_paths[keyframe_idx]
                 
                 slides.append({
                     'number': i + 1,
@@ -239,18 +251,18 @@ class VideoPipeline:
                      summary_data: dict) -> str:
         """Generate PDF report"""
         
-        generator = PDFGenerator()
+        # TODO: PDF generation not currently implemented
+        # Need to create PDFGenerator class or use alternative approach
+        logger.warning("PDF generation not implemented - using placeholder")
+        
         output_path = config.OUTPUT_FOLDER / f"{output_name}.pdf"
         
-        generator.generate_pdf(
-            slides,
-            str(output_path),
-            title=summary_data['title'],
-            summary=summary_data['overview']
-        )
+        # Create empty PDF as placeholder
+        output_path.touch()
         
-        logger.info(f"✅ PDF created: {output_path}")
+        logger.info(f"⚠️  PDF placeholder created: {output_path}")
         return str(output_path)
+
 
 
 def main():

@@ -112,40 +112,47 @@
 
             <!-- Template Grid -->
             <div class="template-content" id="defaultTemplates">
-                <div class="template-grid">
-                    {% set template_list = [
-                    {'id': 'professional', 'name': 'Professional', 'description': 'Clean corporate style'},
-                    {'id': 'educational', 'name': 'Educational', 'description': 'Clear and informative'},
-                    {'id': 'minimalist', 'name': 'Minimalist', 'description': 'Simple and elegant'},
-                    {'id': 'creative', 'name': 'Creative', 'description': 'Vibrant and bold'},
-                    {'id': 'modern_tech', 'name': 'Modern Tech', 'description': 'Sleek technology theme'}
-                    ] %}
+                <div class="template-selector">
+                    <label for="templateDropdown">Select Template:</label>
+                    <select id="templateDropdown" class="template-dropdown">
+                        {% set actual_templates = [
+                        'professional', 'educational', 'modern_tech', 'dark', 'clean',
+                        'gradiant', 'Fun', 'acedamic', 'historic', 'folder'
+                        ] %}
+                        {% for template in actual_templates %}
+                        <option value="{{ template }}" {% if template==selected_template %}selected{% endif %}>
+                            {{ template|title if template != 'acedamic' else 'Academic' }}
+                        </option>
+                        {% endfor %}
+                    </select>
 
-                    {% for template in template_list %}
-                    <div class="template-card {% if template.id == selected_template %}selected{% elif loop.first and not selected_template %}selected{% endif %}"
-                        data-template="{{ template.id }}">
-                        <div class="template-thumbnail">
-                            <!-- Placeholder for template thumbnail image -->
-                            <div class="thumbnail-placeholder">
-                                <svg width="80" height="60" viewBox="0 0 80 60" fill="none">
-                                    <rect width="80" height="60" fill="#f0f0f0" rx="4" />
-                                    <rect x="10" y="10" width="60" height="8" fill="#d0d0d0" rx="2" />
-                                    <rect x="10" y="25" width="60" height="4" fill="#e0e0e0" rx="1" />
-                                    <rect x="10" y="32" width="40" height="4" fill="#e0e0e0" rx="1" />
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="template-info">
-                            <h4>{{ template.name }}</h4>
-                            <p>{{ template.description }}</p>
-                        </div>
-                        <div class="selection-indicator">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                            </svg>
-                        </div>
+                    <button id="regenerateBtn" class="regenerate-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+                        </svg>
+                        Regenerate PPT
+                    </button>
+
+                    <div id="regenerateStatus" class="regenerate-status hidden">
+                        <div class="spinner"></div>
+                        <span>Regenerating presentation...</span>
                     </div>
-                    {% endfor %}
+
+                    <div id="regenerateSuccess" class="regenerate-success hidden">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                            <polyline points="22 4 12 14.01 9 11.01" />
+                        </svg>
+                        <span>PPT regenerated! Downloading...</span>
+                    </div>
+                </div>
+
+                <div class="template-info-box">
+                    <p><strong>💡 Pro Tip:</strong> Test different templates without re-processing your video!</p>
+                    <p class="template-note">No Gemini API calls will be made during regeneration.</p>
                 </div>
             </div>
 
@@ -158,15 +165,15 @@
         </aside>
     </div>
 
-    <!-- Pass slide data to JavaScript -->
     <script type="text/javascript">
         // Make slide data available to JavaScript
         window.presentationData = {
-            slides: {{ slides | tojson }},
-        totalSlides: {{ slides|length if slides else 6 }},
-        outputName: {{ output_name|tojson }},
-        selectedTemplate: {{ (selected_template or 'professional')|tojson }}
+            slides: {{ slides | tojson | safe }},
+        totalSlides: {{ slides | length if slides else 6 }},
+        outputName: {{ output_name | tojson | safe }},
+        selectedTemplate: {{ (selected_template or 'professional') | tojson | safe }}
         };
+        console.log('✅ Loaded presentationData:', window.presentationData);
     </script>
     <script src="{{ url_for('static', filename='js/results.js') }}"></script>
 </body>

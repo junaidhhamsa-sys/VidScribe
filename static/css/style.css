@@ -10,21 +10,21 @@
     --success-color: #10b981;
     --error-color: #ef4444;
     --warning-color: #f59e0b;
-    
+
     --bg-color: #f8fafc;
     --card-bg: #ffffff;
     --border-color: #e2e8f0;
     --text-color: #1e293b;
     --text-light: #64748b;
-    
+
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
     --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-    
+
     --radius-sm: 6px;
     --radius-md: 12px;
     --radius-lg: 16px;
-    
+
     --transition: all 0.3s ease;
 }
 
@@ -189,7 +189,7 @@ input[type="file"] {
     cursor: pointer;
 }
 
-.radio-option input[type="radio"]:checked ~ .radio-label {
+.radio-option input[type="radio"]:checked~.radio-label {
     color: var(--primary-color);
 }
 
@@ -215,70 +215,88 @@ input[type="file"] {
 }
 
 /* Template Grid */
-.template-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
-}
-
-.template-card {
-    display: block;
-    cursor: pointer;
-}
-
-.template-card input[type="radio"] {
-    display: none;
-}
-
-.template-preview {
-    border: 2px solid var(--border-color);
-    border-radius: var(--radius-md);
-    overflow: hidden;
+#templateSection {
     transition: var(--transition);
 }
 
-.template-preview:hover {
+.template-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-top: 0.75rem;
+}
+
+.template-card {
+    position: relative;
+    display: block;
+    cursor: pointer;
+    border: 3px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    transition: var(--transition);
+    background: white;
+}
+
+.template-card:hover {
     border-color: var(--primary-color);
-    transform: translateY(-4px);
+    transform: translateY(-2px);
     box-shadow: var(--shadow-md);
 }
 
-.template-card input:checked ~ .template-preview {
+.template-card input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Show selection state */
+.template-card:has(input:checked) {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    background: rgba(37, 99, 235, 0.05);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-.template-image {
+.template-card:has(input:checked) .template-thumbnail {
+    border-color: var(--primary-color);
+}
+
+.template-card:has(input:checked) .template-info strong {
+    color: var(--primary-color);
+}
+
+.template-thumbnail {
     width: 100%;
-    height: 120px;
-    background: var(--bg-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    height: 140px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-sm);
     overflow: hidden;
+    margin-bottom: 0.75rem;
+    transition: border-color 0.3s ease;
+    background: var(--bg-color);
 }
 
-.template-image img {
+.template-thumbnail img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
 .template-info {
-    padding: 1rem;
-    background: white;
+    text-align: center;
 }
 
 .template-info strong {
     display: block;
-    font-size: 0.95rem;
+    font-size: 1rem;
     margin-bottom: 0.25rem;
     color: var(--text-color);
+    transition: color 0.3s ease;
+    font-weight: 600;
 }
 
 .template-info small {
     display: block;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     color: var(--text-light);
     line-height: 1.4;
 }
@@ -518,6 +536,15 @@ input[type="file"] {
 }
 
 /* Responsive Design */
+/* Tablet */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .template-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+    }
+}
+
+/* Mobile */
 @media (max-width: 768px) {
     .container {
         padding: 1rem;
@@ -536,7 +563,8 @@ input[type="file"] {
     }
 
     .template-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
     }
 
     .action-buttons {
@@ -565,6 +593,7 @@ input[type="file"] {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);

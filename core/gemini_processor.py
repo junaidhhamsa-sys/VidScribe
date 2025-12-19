@@ -308,62 +308,153 @@ class GeminiProcessor:
         while retry_count < max_retries:
             try:
                 prompt = f"""
-                You are creating a CONCISE, POINT-WISE presentation from a video transcript.
+                🚨 CRITICAL REQUIREMENT - READ FIRST 🚨
+                You MUST include AT LEAST ONE slide with [COMPARISON] or [FEATURES] tag.
+                This is MANDATORY and NON-NEGOTIABLE. The presentation will fail if this is missing.
                 
-                CRITICAL RULES:
-                - Each slide should have 5-7 bullet points MAXIMUM
-                - NO long paragraphs - only short, punchy bullet points
-                - Each bullet point should be 10-15 words max
-                - Be direct and concise
-                - Focus on KEY information only
+                You are creating a PROFESSIONAL POWERPOINT PRESENTATION from a video transcript.
+                This presentation will use an educational template with 5 different slide layouts.
                 
-                Create {num_sections} slides using this EXACT format:
+                ═══════════════════════════════════════════════════════════
+                SLIDE TYPES & USAGE:
+                ═══════════════════════════════════════════════════════════
+                
+                Your slides will be mapped to different visual templates based on content type:
+                
+                1. REGULAR TOPIC SLIDE:
+                   - Use for: Standard topics with bullet points
+                   - Format: Title + 4-6 bullet points
+                   
+                2. 🔴 COMPARISON/FEATURE SLIDE (MANDATORY - MUST USE AT LEAST ONCE!):
+                   - Use for: Pros vs Cons, Before vs After, Feature Lists, Comparisons, Benefits
+                   - Format: Title + exactly 6 bullets (will be split into 3 columns × 2 points each)
+                   - Mark with: [COMPARISON] or [FEATURES] tag after title
+                   - Examples: "N8N vs Zapier [COMPARISON]", "Key Features [FEATURES]"
+                   - 🚨 YOU MUST CREATE AT LEAST ONE OF THESE SLIDES 🚨
+                   
+                3. IMAGE SLIDE:
+                   - Automatically assigned when keyframe images are available
+                   - Format: Title + 3-4 brief bullet points
+                
+                ═══════════════════════════════════════════════════════════
+                CRITICAL REQUIREMENTS:
+                ═══════════════════════════════════════════════════════════
+                
+                1. SLIDE TITLES - MUST BE CONCISE AND DESCRIPTIVE:
+                   ✅ DO: "What is N8N?"
+                   ✅ DO: "Key Features of N8N"
+                   ✅ DO: "N8N vs Zapier"
+                   ❌ DON'T: "Section 1", "Introduction", "Overview"
+                   ❌ DON'T: Long titles with more than 5 words
+                   
+                   - Maximum 5 words (STRICTLY ENFORCED)
+                   - Specific to the topic (not generic)
+                   - Use title case
+                   - Questions are allowed (e.g., "What is X?")
+                
+                2. BULLET POINTS:
+                   - Regular slides: 4-6 bullets
+                   - Comparison slides: EXACTLY 6 bullets (3 columns × 2 points each)
+                   - Each bullet: 8-12 words maximum
+                   - Start with action verbs or key nouns
+                   - Complete, self-contained thoughts
+                
+                3. 🚨 CONTENT VARIETY (MANDATORY!):
+                   - YOU MUST include AT LEAST 1 comparison or feature slide with [COMPARISON] or [FEATURES] tag
+                   - Look for: pros/cons, before/after, features, comparisons, benefits in transcript
+                   - If none exist in content, you MUST CREATE one feature list or comparison anyway
+                
+                ═══════════════════════════════════════════════════════════
+                REQUIRED OUTPUT FORMAT:
+                ═══════════════════════════════════════════════════════════
                 
                 TITLE:
-                [One short, clear title (max 10 words)]
+                [Specific video title from content - max 5 words]
+                Example: "Introduction to N8N Automation"
                 
-                OVERVIEW:
-                [2-3 sentence summary of the entire topic - must be SHORT]
+                SUBTITLE:
+                [maximum 1 sentences summarizing the presentation]
                 
-                SLIDE 1: Introduction
-                - [Key point 1]
-                - [Key point 2]
-                - [Key point 3]
-                - [Key point 4]
-                - [Key point 5]
+                SLIDE 1: [Specific Descriptive Title]
+                - Bullet point 1 (8-12 words)
+                - Bullet point 2 (8-12 words)
+                - Bullet point 3 (8-12 words)
+                - Bullet point 4 (8-12 words)
+                - Bullet point 5 (8-12 words)
+                - Bullet point 6 (8-12 words, maximum)
                 
-                SLIDE 2: [Topic Name]
-                - [Key point 1]
-                - [Key point 2]
-                - [Key point 3]
-                - [Key point 4]
-                - [Key point 5]
-                - [Key point 6]
+                SLIDE 2: [Another Specific Title]  
+                - Bullet 1
+                - Bullet 2
+                - Bullet 3
+                - Bullet 4
                 
-                SLIDE 3: [Topic Name]
-                - [Key point 1]
-                - [Key point 2]
-                - [Key point 3]
-                - [Key point 4]
-                - [Key point 5]
+                SLIDE 3: [Title for Comparison/Features] [COMPARISON]
+                - First point for left column
+                - Second point for left column  
+                - Third point for left column
+                - First point for right column
+                - Second point for right column
+                - Third point for right column
+                ⚠️  MANDATORY: You MUST include at least ONE slide with [COMPARISON] or [FEATURES] tag!
+                    This slide must have EXACTLY 6 bullets (3 columns × 2 points each).
+                    Examples: "N8N vs Zapier" [COMPARISON], "Key Features of N8N" [FEATURES]
+                    NOTE: Comparison slides should NOT have images, only text bullets!
+                
+                SLIDE 4: [Specific Title - for keyframe image]
+                - Brief caption point 1 (if image is present)
+                - Brief caption point 2
+                - Brief caption point 3
+                - Brief caption point 4 (maximum 4 bullets for image captions)
+                - Bullet 1
+                - Bullet 2
+                - Bullet 3
+                - Bullet 4
+                - Bullet 5
                 
                 [Continue for remaining slides...]
                 
-                SLIDE {num_sections}: Key Takeaways
-                - [Takeaway 1]
-                - [Takeaway 2]
-                - [Takeaway 3]
-                - [Takeaway 4]
-                - [Takeaway 5]
+                SLIDE {num_sections}: [Concluding Title - Not "Key Takeaways"]
+                - Takeaway 1
+                - Takeaway 2
+                - Takeaway 3
+                - Takeaway 4
                 
-                IMPORTANT:
-                - NO paragraphs or long descriptions
-                - ONLY bullet points (5-7 max per slide)
-                - Keep each bullet SHORT and impactful
-                - Use action words and clear language
-                - Focus on practical, memorable points
+                ═══════════════════════════════════════════════════════════
+                CONTENT GUIDELINES:
+                ═══════════════════════════════════════════════════════════
                 
-                TRANSCRIPT:
+                - Create exactly {num_sections} slides total
+                - FIRST SLIDE: Introduce the main topic
+                - MIDDLE SLIDES: Cover key concepts
+                - 🔴 CRITICAL: At least ONE slide MUST have [COMPARISON] or [FEATURES] tag with 6 bullets
+                - LAST SLIDE: Summarize or provide conclusion
+                - [COMPARISON]/[FEATURES] slides: 6 bullets (3 columns × 2 points), NO images
+                - Picture slides with keyframes: Maximum 4 caption bullets
+                - Regular content slides: 4-6 bullets (MAX 6)
+                - DO NOT create a "Table of Contents" or "Agenda" slide - it will be auto-generated
+                - Ensure logical flow between slides
+                - Use CONCISE titles - MAX 5 WORDS (not generic)
+                
+                ═══════════════════════════════════════════════════════════
+                EXAMPLES OF GOOD TITLES (MAX 5 WORDS):
+                ═══════════════════════════════════════════════════════════
+                
+                ✅ "What is N8N?"
+                ✅ "How Nodes Connect"
+                ✅ "N8N vs Zapier" [COMPARISON]
+                ✅ "Key Features of N8N" [FEATURES]
+                ✅ "Building Your First Workflow"
+                ✅ "Self-Hosting Benefits" [COMPARISON]
+                
+                ❌ "Section 1"
+                ❌ "Introduction"
+                ❌ "Overview"
+                ❌ "Part 2"
+                
+                ═══════════════════════════════════════════════════════════
+                TRANSCRIPT TO ANALYZE:
+                ═══════════════════════════════════════════════════════════
                 {transcript}
                 """
                 
@@ -519,18 +610,43 @@ class GeminiProcessor:
         }
         
         try:
+            # Log the first 800 chars of Gemini response for debugging
+            logger.info(f"📥 RAW Gemini Response (first 800 chars):")
+            logger.info(f"{text[:800]}")
+            logger.info(f"{'='*60}")
+            
             lines = text.split('\n')
             current_section = None
             current_section_data = None
             current_paragraph = []
             
-            for line in lines:
-                line = line.strip()
+            i = 0
+            while i < len(lines):
+                line = lines[i].strip()
                 
-                if line.startswith('TITLE:'):
-                    result['title'] = line.replace('TITLE:', '').strip()
-                elif line.startswith('OVERVIEW:'):
-                    result['overview'] = line.replace('OVERVIEW:', '').strip()
+                # Try to find TITLE (content might be on same line or next line)
+                if line.upper().startswith('TITLE:'):
+                    title_text = line[6:].strip()
+                    if not title_text and i + 1 < len(lines):
+                        title_text = lines[i + 1].strip()
+                        i += 1
+                    result['title'] = title_text
+                    logger.info(f"✅ Found TITLE: '{result['title']}'")
+                # Try to find SUBTITLE or OVERVIEW (content might be on same line or next lines)
+                elif line.upper().startswith(('SUBTITLE:', 'OVERVIEW:')):
+                    overview_text = line[9:].strip()
+                    if not overview_text and i + 1 < len(lines):
+                        overview_lines = []
+                        j = i + 1
+                        while j < len(lines) and not lines[j].strip().startswith(('SLIDE ', 'SECTION ')):
+                            if lines[j].strip():
+                                overview_lines.append(lines[j].strip())
+                            j += 1
+                        overview_text = ' '.join(overview_lines)
+                        i = j - 1
+                    result['overview'] = overview_text
+                    logger.info(f"✅ Found SUBTITLE: '{result['overview'][:100]}...'")
+                    
                 # Support both SLIDE X: and SECTION X: formats
                 elif line.startswith(('SLIDE ', 'SECTION ')):
                     # Save previous section if exists
@@ -540,7 +656,7 @@ class GeminiProcessor:
                             current_section_data['content'].append(' '.join(current_paragraph))
                             current_paragraph = []
                         result['sections'].append(current_section_data)
-                    
+                
                     # Extract title after the colon
                     title = line.split(':', 1)[1].strip() if ':' in line else line
                     current_section_data = {'title': title, 'content': []}
@@ -567,12 +683,23 @@ class GeminiProcessor:
                 elif line and current_section_data:
                     # Regular paragraph text - accumulate it
                     current_paragraph.append(line)
+                
+                i += 1  # Increment loop counter
             
             # Add final pending content
             if current_section_data:
                 if current_paragraph:
                     current_section_data['content'].append(' '.join(current_paragraph))
                 result['sections'].append(current_section_data)
+            
+            # Log final result
+            logger.info(f"📊 PARSED: title='{result['title']}' (len={len(result['title'])}), overview_len={len(result['overview'])}, sections={len(result['sections'])}")
+            
+            # Warn if title is still default
+            if result['title'] == 'Content Summary':
+                logger.warning(f"⚠️  Title was not found in Gemini response! Using default.")
+            if not result['overview']:
+                logger.warning(f"⚠️  Overview was not found in Gemini response!")
             
         except Exception as e:
             logger.error(f"Error parsing sections: {e}")

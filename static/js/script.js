@@ -11,8 +11,7 @@ const videoFileInput = document.getElementById('videoFile');
 const fileNameDisplay = document.getElementById('fileName');
 const fileLabel = document.querySelector('.file-label');
 const outputFormatRadios = document.querySelectorAll('input[name="output_format"]');
-const templateSelection = document.getElementById('templateSelection');
-
+const templateSection = document.getElementById('templateSection');
 const uploadSection = document.getElementById('uploadSection');
 const processingSection = document.getElementById('processingSection');
 const resultsSection = document.getElementById('resultsSection');
@@ -84,12 +83,11 @@ function handleFileSelect(event) {
 
 function handleFormatChange(event) {
     const format = event.target.value;
-
     // Show/hide template selection based on format
-    if (format === 'ppt') {
-        templateSelection.style.display = 'block';
-    } else {
-        templateSelection.style.display = 'none';
+    if (format === 'ppt' && templateSection) {
+        templateSection.classList.remove('hidden');
+    } else if (templateSection) {
+        templateSection.classList.add('hidden');
     }
 }
 
@@ -342,9 +340,10 @@ function resetApp() {
     fileNameDisplay.textContent = 'Choose video file...';
     fileLabel.classList.remove('has-file');
 
-    // Reset template selection visibility
-    templateSelection.style.display = 'block';
-
+    // Reset template selection visibility (show by default for PPT)
+    if (templateSection) {
+        templateSection.classList.remove('hidden');
+    }
     // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }

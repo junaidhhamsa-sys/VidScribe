@@ -30,15 +30,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Load presentation data from window object
 function loadPresentationData() {
+  console.log('🔍 Loading presentation data...');
+  console.log('window.presentationData:', window.presentationData);
+
   if (window.presentationData) {
     slidesData = window.presentationData.slides || [];
     totalSlides = window.presentationData.totalSlides || slidesData.length || 6;
     selectedTemplate = window.presentationData.selectedTemplate || 'professional';
 
-    console.log('Loaded presentation:', {
+    console.log('✅ Loaded presentation:', {
       slides: slidesData.length,
-      template: selectedTemplate
+      totalSlides: totalSlides,
+      template: selectedTemplate,
+      firstSlide: slidesData[0]
     });
+  } else {
+    console.error('❌ window.presentationData is undefined!');
   }
 }
 
@@ -241,11 +248,77 @@ function initButtons() {
   downloadBtn.addEventListener('click', handleDownload);
   presentBtn.addEventListener('click', handlePresent);
 
+  // Template regeneration button
+  const regenerateBtn = document.getElementById('regenerateBtn');
+  const templateDropdown = document.getElementById('templateDropdown');
+
+  if (regenerateBtn && templateDropdown) {
+    regenerateBtn.addEventListener('click', function () {
+      const selectedTemplate = templateDropdown.value;
+      handleRegenerate(selectedTemplate);
+    });
+  }
+
   // Close template panel (for mobile)
   if (closeTemplatePanel) {
     closeTemplatePanel.addEventListener('click', function () {
       document.querySelector('.template-panel').classList.remove('open');
     });
+  }
+}
+
+// Handle template regeneration
+async function handleRegenerate(templateName) {
+  console.log(`🔄 Regenerating PPT with template: ${templateName}`);
+
+  const regenerateBtn = document.getElementById('regenerateBtn');
+  const statusDiv = document.getElementById('regenerateStatus');
+  const successDiv = document.getElementById('regenerateSuccess');
+  const outputName = window.presentationData.outputName;
+
+  // Show loading state
+  regenerateBtn.disabled = true;
+  statusDiv.classList.remove('hidden');
+  successDiv.classList.add('hidden');
+
+  try {
+    const response = await fetch(`/regenerate-ppt/${outputName}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ template: templateName })
+    });
+
+    const result = await response.json();
+
+    if (response.ok && result.status === 'success') {
+      console.log('✅ PPT regenerated successfully!');
+
+      // Hide loading, show success
+      statusDiv.classList.add('hidden');
+      successDiv.classList.remove('hidden');
+
+      // Download the new file
+      setTimeout(() => {
+        window.location.href = result.download_url;
+
+        // Reset UI after download starts
+        setTimeout(() => {
+          successDiv.classList.add('hidden');
+          regenerateBtn.disabled = false;
+        }, 2000);
+      }, 500);
+
+    } else {
+      throw new Error(result.error || 'Regeneration failed');
+    }
+
+  } catch (error) {
+    console.error('❌ Regeneration error:', error);
+    statusDiv.classList.add('hidden');
+    regenerateBtn.disabled = false;
+    alert(`Failed to regenerate PPT: ${error.message}`);
   }
 }
 

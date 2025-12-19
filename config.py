@@ -107,7 +107,8 @@ PPT_TEMPLATES = {
     }
 }
 
-DEFAULT_TEMPLATE = 'professional'  # Default template if none selected
+DEFAULT_TEMPLATE = 'educational'  # Default template if none selected
+
 
 # ============================================================================
 # PROCESSING SETTINGS
@@ -118,7 +119,7 @@ VISUAL_SELECTION_METHOD = "gemini"  # Options: gemini, diversity, time_based
 
 # Cleanup Settings
 AUTO_DELETE_UPLOADS = True  # Delete uploaded videos after processing
-AUTO_DELETE_TEMP = True  # Keep temp files so keyframes can be saved
+AUTO_DELETE_TEMP = False  # DISABLED - Keep temp files so keyframes can be auto-saved
 KEEP_OUTPUTS_HOURS = 24  # Keep generated files for 24 hours
 
 # ============================================================================

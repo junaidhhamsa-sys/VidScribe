@@ -1,207 +1,288 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VidScribe - AI Video Summarizer</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/style.css') }}"
-    />
-  </head>
-  <body>
-    <div class="container">
-      <!-- Header -->
-      <header class="header">
-        <h1>🎬 VidScribe</h1>
-        <p class="tagline">AI-Powered Video Summarization</p>
-      </header>
 
-      <!-- Main Content -->
-      <main class="main-content">
-        <!-- Upload Section -->
-        <section class="upload-section" id="uploadSection">
-          <div class="card">
-            <h2>📤 Upload Video</h2>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VidScribe - AI Video Summarizer</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
 
-            <form id="uploadForm" enctype="multipart/form-data">
-              <!-- File Upload -->
-              <div class="form-group">
-                <label for="videoFile" class="file-label">
-                  <span class="file-icon">📁</span>
-                  <span id="fileName">Choose video file...</span>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <h1>🎬 VidScribe</h1>
+      <p class="tagline">AI-Powered Video Summarization</p>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Upload Section -->
+      <section class="upload-section" id="uploadSection">
+        <div class="card">
+          <h2>📤 Upload Video</h2>
+
+          <form id="uploadForm" enctype="multipart/form-data">
+            <!-- File Upload -->
+            <div class="form-group">
+              <label for="videoFile" class="file-label">
+                <span class="file-icon">📁</span>
+                <span id="fileName">Choose video file...</span>
+              </label>
+              <input type="file" id="videoFile" name="video" accept="video/*" required />
+              <small class="help-text">
+                Max: {{ (config.MAX_FILE_SIZE / (1024**3)) | round(1) }}GB |
+                Duration: Up to {{ config.MAX_VIDEO_DURATION // 60 }} minutes
+                | Formats: MP4, AVI, MOV, MKV, etc.
+              </small>
+            </div>
+
+            <!-- Output Format Selection -->
+            <div class="form-group">
+              <label>📊 Output Format</label>
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="output_format" value="ppt" checked />
+                  <span class="radio-label">
+                    <strong>PowerPoint</strong>
+                    <small>Slides with images and text</small>
+                  </span>
                 </label>
-                <input
-                  type="file"
-                  id="videoFile"
-                  name="video"
-                  accept="video/*"
-                  required
-                />
-                <small class="help-text">
-                  Max: {{ (config.MAX_FILE_SIZE / (1024**3)) | round(1) }}GB |
-                  Duration: Up to {{ config.MAX_VIDEO_DURATION // 60 }} minutes
-                  | Formats: MP4, AVI, MOV, MKV, etc.
-                </small>
-              </div>
-
-              <!-- Output Format Selection -->
-              <div class="form-group">
-                <label>📊 Output Format</label>
-                <div class="radio-group">
-                  <label class="radio-option">
-                    <input
-                      type="radio"
-                      name="output_format"
-                      value="ppt"
-                      checked
-                    />
-                    <span class="radio-label">
-                      <strong>PowerPoint</strong>
-                      <small>Slides with images and text</small>
-                    </span>
-                  </label>
-                  <label class="radio-option">
-                    <input type="radio" name="output_format" value="pdf" />
-                    <span class="radio-label">
-                      <strong>PDF Report</strong>
-                      <small>Document-style summary</small>
-                    </span>
-                  </label>
-                  <label class="radio-option">
-                    <input type="radio" name="output_format" value="summary" />
-                    <span class="radio-label">
-                      <strong>Summary Only</strong>
-                      <small>Text summary (no download)</small>
-                    </span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- Template Selection (only for PPT) -->
-              <div class="form-group" id="templateSelection">
-                <label>🎨 Presentation Template</label>
-                <div class="template-grid">
-                  {% for template in templates %}
-                  <label class="template-card">
-                    <input
-                      type="radio"
-                      name="template"
-                      value="{{ template.id }}"
-                      {%
-                      if
-                      loop.first
-                      %}checked{%
-                      endif
-                      %}
-                    />
-                    <div class="template-preview">
-                      <div class="template-image">
-                        <img
-                          src="{{ url_for('static', filename='images/templates/' + template.id + '.png') }}"
-                          alt="{{ template.name }}"
-                          onerror="handleImageError(this)"
-                        />
-                      </div>
-                      <div class="template-info">
-                        <strong>{{ template.name }}</strong>
-                        <small>{{ template.description }}</small>
-                      </div>
-                    </div>
-                  </label>
-                  {% endfor %}
-                </div>
-              </div>
-
-              <!-- Submit Button -->
-              <button type="submit" class="btn btn-primary" id="uploadBtn">
-                <span>🚀 Start Processing</span>
-              </button>
-            </form>
-          </div>
-        </section>
-
-        <!-- Processing Section -->
-        <section class="processing-section hidden" id="processingSection">
-          <div class="card">
-            <h2>⚙️ Processing Video</h2>
-
-            <div class="video-info" id="videoInfo"></div>
-
-            <div class="progress-container">
-              <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
-              </div>
-              <p class="progress-text" id="progressText">Initializing...</p>
-            </div>
-
-            <div class="processing-steps">
-              <div class="step" data-step="1">
-                <span class="step-icon">✓</span>
-                <span>Video Validation</span>
-              </div>
-              <div class="step" data-step="2">
-                <span class="step-icon">⏳</span>
-                <span>Keyframe Extraction</span>
-              </div>
-              <div class="step" data-step="3">
-                <span class="step-icon">⏳</span>
-                <span>Audio Transcription</span>
-              </div>
-              <div class="step" data-step="4">
-                <span class="step-icon">⏳</span>
-                <span>AI Caption Generation</span>
-              </div>
-              <div class="step" data-step="5">
-                <span class="step-icon">⏳</span>
-                <span>Content Summarization</span>
-              </div>
-              <div class="step" data-step="6">
-                <span class="step-icon">⏳</span>
-                <span>Output Generation</span>
+                <label class="radio-option">
+                  <input type="radio" name="output_format" value="pdf" />
+                  <span class="radio-label">
+                    <strong>PDF Report</strong>
+                    <small>Document-style summary</small>
+                  </span>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="output_format" value="summary" />
+                  <span class="radio-label">
+                    <strong>Summary Only</strong>
+                    <small>Text summary (no download)</small>
+                  </span>
+                </label>
               </div>
             </div>
-          </div>
-        </section>
 
-        <!-- Results Section -->
-        <section class="results-section hidden" id="resultsSection">
-          <div class="card">
-            <h2>✅ Processing Complete!</h2>
+            <!-- Template Selection (for PPT only) -->
+            <div class="form-group" id="templateSection">
+              <label>🎨 PowerPoint Template</label>
+              <div class="template-grid">
+                <!-- Educational Template -->
+                <label class="template-card">
+                  <input type="radio" name="ppt_template" value="educational" checked />
+                  <div class="template-thumbnail">
+                    <img src="{{ url_for('static', filename='images/template_thumbnails/educational.png') }}"
+                      alt="Educational Template" onerror="handleImageError(this)" />
+                  </div>
+                  <div class="template-info">
+                    <strong>Educational</strong>
+                  </div>
+                </label>
 
-            <div class="results-info" id="resultsInfo"></div>
+                <!-- Professional Template -->
+                <label class="template-card">
+                  <input type="radio" name="ppt_template" value="professional" />
+                  <div class="template-thumbnail">
+                    <img src="{{ url_for('static', filename='images/template_thumbnails/professional.png') }}"
+                      alt="Professional Template" onerror="handleImageError(this)" />
+                  </div>
+                  <div class="template-info">
+                    <strong>Professional</strong>
+                  </div>
+                </label>
 
-            <div class="summary-box" id="summaryBox"></div>
+                <!-- Clean Template -->
+                <label class="template-card">
+                  <input type="radio" name="ppt_template" value="clean" />
+                  <div class="template-thumbnail">
+                    <img src="{{ url_for('static', filename='images/template_thumbnails/clean.png') }}"
+                      alt="Clean Template" onerror="handleImageError(this)" />
+                  </div>
+                  <div class="template-info">
+                    <strong>Clean</strong>
+                  </div>
+                </label>
 
-            <div class="action-buttons">
-              <button class="btn btn-success" id="downloadBtn">
-                <span>📥 Download</span>
-              </button>
-              <button class="btn btn-secondary" id="newVideoBtn">
-                <span>🔄 Process Another Video</span>
-              </button>
+                <!-- Fun Template -->
+                <label class="template-card">
+                  <input type="radio" name="ppt_template" value="Fun" />
+                  <div class="template-thumbnail">
+                    <img src="{{ url_for('static', filename='images/template_thumbnails/Fun.png') }}" alt="Fun Template"
+                      onerror="handleImageError(this)" />
+                  </div>
+                  <div class="template-info">
+                    <strong>Fun</strong>
+                  </div>
+                </label>
+
+                <!-- Academic Template -->
+                <label class="template-card">
+                  <input type="radio" name="ppt_template" value="acedamic" />
+                  <div class="template-thumbnail">
+                    <img src="{{ url_for('static', filename='images/template_thumbnails/acedamic.png') }}"
+                      alt="Academic Template" onerror="handleImageError(this)" />
+                  </div>
+                  <div class="template-info">
+                    <strong>Academic</strong>
+                  </div>
+                </label>
+
+                <!-- Dark Template -->
+                <label class="template-card">
+                  <input type="radio" name="ppt_template" value="dark" />
+                  <div class="template-thumbnail">
+                    <img src="{{ url_for('static', filename='images/template_thumbnails/dark.png') }}"
+                      alt="Dark Template" onerror="handleImageError(this)" />
+                  </div>
+                  <div class="template-info">
+                    <strong>Dark</strong>
+                  </div>
+                </label>
+
+                <!-- Folder Template -->
+                <label class="template-card">
+                  <input type="radio" name="ppt_template" value="folder" />
+                  <div class="template-thumbnail">
+                    <img src="{{ url_for('static', filename='images/template_thumbnails/folder.png') }}"
+                      alt="Folder Template" onerror="handleImageError(this)" />
+                  </div>
+                  <div class="template-info">
+                    <strong>Folder</strong>
+                  </div>
+                </label>
+
+                <!-- Gradient Template -->
+                <label class="template-card">
+                  <input type="radio" name="ppt_template" value="gradiant" />
+                  <div class="template-thumbnail">
+                    <img src="{{ url_for('static', filename='images/template_thumbnails/gradiant.png') }}"
+                      alt="Gradient Template" onerror="handleImageError(this)" />
+                  </div>
+                  <div class="template-info">
+                    <strong>Gradient</strong>
+                  </div>
+                </label>
+
+                <!-- Historic Template -->
+                <label class="template-card">
+                  <input type="radio" name="ppt_template" value="historic" />
+                  <div class="template-thumbnail">
+                    <img src="{{ url_for('static', filename='images/template_thumbnails/historic.png') }}"
+                      alt="Historic Template" onerror="handleImageError(this)" />
+                  </div>
+                  <div class="template-info">
+                    <strong>Historic</strong>
+                  </div>
+                </label>
+
+                <!-- Modern Tech Template -->
+                <label class="template-card">
+                  <input type="radio" name="ppt_template" value="modern_tech" />
+                  <div class="template-thumbnail">
+                    <img src="{{ url_for('static', filename='images/template_thumbnails/modern_tech.png') }}"
+                      alt="Modern Tech Template" onerror="handleImageError(this)" />
+                  </div>
+                  <div class="template-info">
+                    <strong>Modern Tech</strong>
+                  </div>
+                </label>
+              </div>
             </div>
-          </div>
-        </section>
+        </div>
 
-        <!-- Error Section -->
-        <section class="error-section hidden" id="errorSection">
-          <div class="card error-card">
-            <h2>❌ Error</h2>
-            <p class="error-message" id="errorMessage"></p>
-            <button class="btn btn-secondary" id="retryBtn">
-              <span>🔄 Try Again</span>
-            </button>
-          </div>
-        </section>
-      </main>
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary" id="uploadBtn">
+          <span>🚀 Start Processing</span>
+        </button>
+        </form>
+  </div>
+  </section>
 
-      <!-- Footer -->
-      <footer class="footer">
-        <p>Powered by OpenCV, Whisper & Gemini AI | VidScribe v1.0</p>
-      </footer>
+  <!-- Processing Section -->
+  <section class="processing-section hidden" id="processingSection">
+    <div class="card">
+      <h2>⚙️ Processing Video</h2>
+
+      <div class="video-info" id="videoInfo"></div>
+
+      <div class="progress-container">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <p class="progress-text" id="progressText">Initializing...</p>
+      </div>
+
+      <div class="processing-steps">
+        <div class="step" data-step="1">
+          <span class="step-icon">✓</span>
+          <span>Video Validation</span>
+        </div>
+        <div class="step" data-step="2">
+          <span class="step-icon">⏳</span>
+          <span>Keyframe Extraction</span>
+        </div>
+        <div class="step" data-step="3">
+          <span class="step-icon">⏳</span>
+          <span>Audio Transcription</span>
+        </div>
+        <div class="step" data-step="4">
+          <span class="step-icon">⏳</span>
+          <span>AI Caption Generation</span>
+        </div>
+        <div class="step" data-step="5">
+          <span class="step-icon">⏳</span>
+          <span>Content Summarization</span>
+        </div>
+        <div class="step" data-step="6">
+          <span class="step-icon">⏳</span>
+          <span>Output Generation</span>
+        </div>
+      </div>
     </div>
+  </section>
 
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-  </body>
+  <!-- Results Section -->
+  <section class="results-section hidden" id="resultsSection">
+    <div class="card">
+      <h2>✅ Processing Complete!</h2>
+
+      <div class="results-info" id="resultsInfo"></div>
+
+      <div class="summary-box" id="summaryBox"></div>
+
+      <div class="action-buttons">
+        <button class="btn btn-success" id="downloadBtn">
+          <span>📥 Download</span>
+        </button>
+        <button class="btn btn-secondary" id="newVideoBtn">
+          <span>🔄 Process Another Video</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Error Section -->
+  <section class="error-section hidden" id="errorSection">
+    <div class="card error-card">
+      <h2>❌ Error</h2>
+      <p class="error-message" id="errorMessage"></p>
+      <button class="btn btn-secondary" id="retryBtn">
+        <span>🔄 Try Again</span>
+      </button>
+    </div>
+  </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>Powered by OpenCV, Whisper & Gemini AI | VidScribe v1.0</p>
+  </footer>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+
 </html>
