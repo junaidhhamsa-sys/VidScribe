@@ -169,9 +169,9 @@
         // Make slide data available to JavaScript
         window.presentationData = {
             slides: {{ slides | tojson | safe }},
-        totalSlides: {{ slides | length if slides else 6 }},
-        outputName: {{ output_name | tojson | safe }},
-        selectedTemplate: {{ (selected_template or 'professional') | tojson | safe }}
+        totalSlides: { { slides | length if slides else 6 } },
+        outputName: { { output_name | tojson | safe } },
+        selectedTemplate: { { (selected_template or 'professional') | tojson | safe } }
         };
         console.log('✅ Loaded presentationData:', window.presentationData);
     </script>
