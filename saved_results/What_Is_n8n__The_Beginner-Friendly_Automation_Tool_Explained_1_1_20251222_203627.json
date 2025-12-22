@@ -1,0 +1,79 @@
+{
+  "status": "complete",
+  "video_path": "/Users/falahi/VidScrib/static/uploads/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251222_203627.mp4",
+  "output_format": "ppt",
+  "start_time": 1766415987.3771179,
+  "video_info": {
+    "duration_seconds": 212.67934601267936,
+    "duration_formatted": "3:32",
+    "fps": 29.97,
+    "frame_count": 6374,
+    "resolution": "1280x720",
+    "width": 1280,
+    "height": 720,
+    "file_size_bytes": 8751769,
+    "file_size_mb": 8.34633731842041,
+    "format": ".mp4"
+  },
+  "keyframe_count": 5,
+  "transcript": " Welcome to the NADN introduction course. In this first lesson, we'll cover what NADN is and why it's becoming the go-to choice for workflow automation. How much time do you spend on repetitive tasks? Copying data between apps, sending the same notifications, updating multiple systems with the same information? These manual tasks eat up hours every week, but what if we could automate them? That's where NADN comes in. NADN, pronounced NADN, is a workflow automation tool that connects your apps and services together. Think of it as a digital assembly line. You design the workflow once, and NADN executes it automatically, whether that's every minute, every day, or whenever a specific event happens. What makes NADN special is its visual approach. Instead of writing complex code, you build workflows by dragging and dropping nodes, each representing an action or service. You want to save an email attachment to the Google Drive and notify your team on Slack, disconnect the nodes, and you're done. Okay, so you're probably wondering how is NADN different from tools like Zapier or Make? First of all, the FairCode model. Unlike closed source alternatives, you can see exactly how NADN works and even modify it for your needs. Second, self-hosting. Your data stays on your server, complete control, complete privacy. Third, no execution limits when self-hosting. Run workflows as often as you need without worrying about quotas. And fourth, developer friendly. You can write custom JavaScript when you need to, but you don't have to. Being open source isn't just about free software. It also means a vibrant community creating new integrations, transparent development. You can see what's coming next. No vendor lock-in. Your workflows are yours. And the ability to contribute and shape the tools future. Now, let's think about what you can actually build with handy dint, right? So let's say you have an e-commerce store. You can have a system, an automation that automatically processes orders, updates inventory, and sends the shipping notifications. If you're an HR team, streamlining onboarding, you can create accounts. You can send the welcome emails. You can schedule the meetings, stuff like that. Anything that an HR team would have to do manually, you can automate. How about if you need to modify data, right? Like you're some part of a data team. You can extract data from APIs. You can pull that in. You can transform it. And you can load it into a database or some other warehouse. Any dyn is for anyone who wants to automate work. Business users tired of manual data entry, developers who want to build integrations fast, IT teams needing to connect enterprise systems, entrepreneurs, scaling their operations. You don't need to be a programmer. If you can draw a flow chart, you can build with any dyn. It's that easy. Now that you understand what any dyn is and why it's powerful, you're ready to get hands on. In the next lesson, we'll walk through installing an in and setting up your first workspace. Get ready to say goodbye to repetitive tasks and hello to automation.",
+  "language": "en",
+  "captions": [],
+  "title": "NADN Introduction Course",
+  "overview": "Learn what NADN is and how it automates repetitive tasks by connecting your apps and services visually.",
+  "summary": "Learn what NADN is and how it automates repetitive tasks by connecting your apps and services visually.",
+  "slides": [
+    {
+      "number": 1,
+      "title": "What is NADN?",
+      "content": "NADN is a workflow automation tool connecting apps and services.\nIt functions like a digital assembly line for automating tasks.\nWorkflows are designed visually by dragging and dropping nodes.\nEach node represents a specific action or integration with a service.\nAutomate repetitive tasks like data transfer or sending notifications.\nNADN executes workflows automatically on a schedule or by event.",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251222_203627_keyframes/keyframe_000_t0.00s.jpg"
+    },
+    {
+      "number": 2,
+      "title": "Automate Manual Tasks",
+      "content": "Spending hours weekly on repetitive manual tasks?\nExamples include data copying between apps and sending notifications.\nUpdating multiple systems with the same information is time-consuming.\nNADN offers a solution to automate these manual processes.\nFree up your time for more strategic and impactful work.\nEmbrace efficiency with automated workflow execution.",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251222_203627_keyframes/keyframe_001_t9.84s.jpg"
+    },
+    {
+      "number": 3,
+      "title": "NADN Key Features [FEATURES]",
+      "content": "Open-source FairCode model: Inspect and modify its workings.\nSelf-hosting capability: Keep your data private and controlled.\nUnlimited execution on self-hosting: No worries about quotas.\nDeveloper friendly: Integrate custom JavaScript when needed.\nVibrant community: Creates new integrations and supports development.\nNo vendor lock-in: Your workflows are entirely yours.",
+      "keyframe_path": null
+    },
+    {
+      "number": 4,
+      "title": "NADN vs. Alternatives [COMPARISON]",
+      "content": "NADN: Fully open-source, transparent, and customizable.\nAlternatives: Often closed-source, limiting visibility and modification.\nNADN Self-Hosting: Offers complete data privacy and control.\nAlternatives: May store data on their servers, raising privacy concerns.\nNADN Self-Hosting: Provides unlimited workflow executions.\nAlternatives: Often have execution limits and pricing tiers.",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251222_203627_keyframes/keyframe_002_t14.85s.jpg"
+    },
+    {
+      "number": 5,
+      "title": "What Can You Build?",
+      "content": "E-commerce: Automate order processing and inventory updates.\nHR Teams: Streamline onboarding with automated account creation.\nHR Teams: Send welcome emails and schedule onboarding meetings.\nData Teams: Extract, transform, and load data from APIs.\nTransform data into databases or other data warehouses.\nAutomate any manual process to improve efficiency.",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251222_203627_keyframes/keyframe_003_t18.02s.jpg"
+    },
+    {
+      "number": 6,
+      "title": "Who is NADN For?",
+      "content": "Business users tired of manual data entry and repetitive tasks.\nDevelopers seeking to build integrations quickly and efficiently.\nIT teams needing to connect disparate enterprise systems.\nEntrepreneurs looking to scale operations through automation.\nUsers who can draw a flowchart can build with NADN.\nNo extensive programming knowledge is required to start.",
+      "keyframe_path": null
+    },
+    {
+      "number": 7,
+      "title": "Building Your First Workflow",
+      "content": "NADN provides a visual interface for workflow design.\nConnect nodes to define the sequence of automated actions.\nDesign the workflow once and let NADN handle execution.\nAutomate tasks based on specific events or schedules.\nSay goodbye to time-consuming, repetitive tasks.\nWelcome a new era of efficient workflow automation.",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251222_203627_keyframes/keyframe_004_t24.49s.jpg"
+    },
+    {
+      "number": 8,
+      "title": "Conclusion: Embrace Automation",
+      "content": "NADN offers a powerful, visual approach to workflow automation.\nIts open-source nature provides transparency and control.\nSelf-hosting ensures data privacy and unlimited execution.\nEmpower yourself and your team to automate manual tasks.\nSimplify complex processes with intuitive node-based design.\nStart your automation journey with NADN today.",
+      "keyframe_path": null
+    }
+  ],
+  "output_path": "/Users/falahi/VidScrib/outputs/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251222_203627.pptx",
+  "output_type": "ppt",
+  "template": "educational",
+  "processing_time": 14.34951400756836
+}

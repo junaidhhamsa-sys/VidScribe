@@ -118,15 +118,17 @@ def process_video_background(video_path: str, output_format: str,
     """Process video in background thread"""
     
     try:
-        # Update status
-        processing_status[output_name] = {
-            'status': 'processing',
-            'progress': 10,
-            'message': 'Initializing pipeline...'
-        }
+        # Define progress callback to update status
+        def update_progress(progress: int, message: str):
+            processing_status[output_name] = {
+                'status': 'processing',
+                'progress': progress,
+                'message': message
+            }
+            logger.info(f"Progress: {progress}% - {message}")
         
-        # Initialize pipeline
-        pipeline = VideoPipeline()
+        # Initialize pipeline with progress callback
+        pipeline = VideoPipeline(progress_callback=update_progress)
         
         # Process video
         results = pipeline.process_video(
@@ -357,10 +359,31 @@ def show_results(output_name):
     
     # Check if results exist
     if output_name not in processing_results:
-        return render_template('index.html', 
-                             templates=get_available_templates(), 
-                             config=config,
-                             error='Results not found'), 404
+        # Try loading from saved_results
+        saved_path = Path(__file__).parent / "saved_results" / f"{output_name}.json"
+        if saved_path.exists():
+            import json
+            try:
+                with open(saved_path, 'r', encoding='utf-8') as f:
+                    results = json.load(f)
+                processing_results[output_name] = results
+                processing_status[output_name] = {
+                    'status': 'complete',
+                    'progress': 100,
+                    'message': 'Loaded from saved results'
+                }
+                logger.info(f"✅ Loaded saved results: {output_name}")
+            except Exception as e:
+                logger.error(f"Error loading saved results: {e}")
+                return render_template('index.html', 
+                                     templates=get_available_templates(),
+                                     config=config,
+                                     error='Results not found'), 404
+        else:
+            return render_template('index.html', 
+                                 templates=get_available_templates(), 
+                                 config=config,
+                                 error='Results not found'), 404
     
     results = processing_results[output_name]
     
@@ -371,30 +394,15 @@ def show_results(output_name):
                              config=config,
                              error='Processing not complete'), 400
     
-    # Debug logging
-    logger.info(f"Results keys: {results.keys()}")
-    logger.info(f"Number of slides: {len(results.get('slides', []))}")
-    if results.get('slides'):
-        logger.info(f"First slide: {results['slides'][0]}")
-    
-    # Get presentation details
-    presentation_data = {
-        'title': results.get('title', 'Video Summary'),
-        'summary': results.get('summary', ''),
-        'slides': results.get('slides', []),
-        'slides_count': len(results.get('slides', [])),
-        'output_path': results.get('output_path'),
-        'template': results.get('template', config.DEFAULT_TEMPLATE)
-    }
-    
-    logger.info(f"Passing {presentation_data['slides_count']} slides to template")
-    
-    return render_template('results.html',
-                         presentation_title=presentation_data['title'],
-                         slides=presentation_data['slides'],
-                         slides_count=presentation_data['slides_count'],
+    # Render INDEX.HTML with results data
+    return render_template('index.html',
+                         templates=get_available_templates(),
+                         config=config,
+                         # Results data passed to index.html
+                         slides=results.get('slides', []),
                          output_name=output_name,
-                         selected_template=presentation_data['template'])
+                         selected_template=results.get('template', config.DEFAULT_TEMPLATE),
+                         presentation_title=results.get('title', 'Video Summary'))
 
 
 @app.route('/test-results')

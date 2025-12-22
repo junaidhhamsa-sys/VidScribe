@@ -1,0 +1,79 @@
+{
+  "status": "complete",
+  "video_path": "/Users/falahi/VidScrib/static/uploads/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251222_185819.mp4",
+  "output_format": "ppt",
+  "start_time": 1766410100.02864,
+  "video_info": {
+    "duration_seconds": 212.67934601267936,
+    "duration_formatted": "3:32",
+    "fps": 29.97,
+    "frame_count": 6374,
+    "resolution": "1280x720",
+    "width": 1280,
+    "height": 720,
+    "file_size_bytes": 8751769,
+    "file_size_mb": 8.34633731842041,
+    "format": ".mp4"
+  },
+  "keyframe_count": 5,
+  "transcript": " Welcome to the N8n Introduction course. In this first lesson, we'll cover what N8n is and why it's becoming the go-to choice for workflow automation. How much time do you spend on repetitive tasks? Copying data between apps, sending the same notifications, updating multiple systems with the same information. These manual tasks eat up hours every week, but what if we could automate them? That's where N8n comes in. N8n, pronounced N8n, is a workflow automation tool that connects your apps and services together. Think of it as a digital assembly line. You design the workflow once, and N8n executes it automatically whether that's every minute, every day, or whenever a specific event happens. What makes N8n special is its visual approach. Instead of writing complex code, you build workflows by dragging and dropping nodes, each representing an action or service. You want to save an email attachment to the Google Drive and notify your team on Slack? Just connect the nodes, and you're done. How is N8n different from tools like Zapier or Make? Okay, so you're probably wondering how is N8n different from tools like Zapier or Make. First of all, the fair code model. Unlike closed source alternatives, you can see exactly how N8n works and even modify it for your needs. Second, self-hosting. Your data stays on your server, complete control, complete privacy. Third, no execution limits when self-hosting. Run workflows as often as you need without worrying about quotas. And fourth, developer-friendly. You can write custom JavaScript when you need to, but you don't have to. Being open source isn't just about free software. It also means a vibrant community, creating new integrations, transparent development. You can see what's coming next. No vendor lock-in. Your workflows are yours. And the ability to contribute and shape the tool's future. Now let's think about what you can actually build with N8n. So let's say you have an e-commerce store. You can have a system, an automation that automatically processes orders, updates inventory, and sends the shipping notifications. If you're an HR team, streamlining onboarding, you can create accounts. You can send the welcome emails. You can schedule the meetings. Stuff like that. Anything that an HR team would have to do manually, you can automate. How about if you need to modify data, right? Like you're some part of a data team. You can extract data from APIs. You can pull that in. You can transform it, and you can load it into a database or some other warehouse. N8n is for anyone who wants to automate work. Business users tired of manual data entry. Developers who want to build integrations fast. IT teams needing to connect enterprise systems. Entrepreneurs scaling their operations. You don't need to be a programmer. If you can draw a flow chart, you can build with N8n. It's that easy. Now that you understand what N8n is and why it's powerful, you're ready to get hands on. In the next lesson, we'll walk through installing N8n and setting up your first workspace. Get ready to say goodbye to repetitive tasks and hello to automation.",
+  "language": "en",
+  "captions": [],
+  "title": "N8N Workflow Automation Introduction",
+  "overview": "Discover N8N, a powerful, open-source workflow automation tool transforming repetitive tasks into efficient processes.",
+  "summary": "Discover N8N, a powerful, open-source workflow automation tool transforming repetitive tasks into efficient processes.",
+  "slides": [
+    {
+      "number": 1,
+      "title": "What is N8N Automation?",
+      "content": "N8N connects various applications and services seamlessly.\nIt's a robust workflow automation tool, a digital assembly line.\nAutomate tasks that consume precious weekly hours.\nDesign workflows once, N8N executes them automatically.\nEmploys a visual, drag-and-drop interface for building.\nBuild workflows using interconnected action nodes.",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251222_185819_keyframes/keyframe_000_t0.00s.jpg"
+    },
+    {
+      "number": 2,
+      "title": "N8N vs Closed Alternatives [COMPARISON]",
+      "content": "Fair code model offers complete transparency.\nSelf-hosting ensures full data control and privacy.\nNo execution limits when self-hosting.\nDeveloper-friendly, allowing custom JavaScript.\nVibrant community drives new integrations.\nEliminates vendor lock-in, you own workflows.",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251222_185819_keyframes/keyframe_001_t9.84s.jpg"
+    },
+    {
+      "number": 3,
+      "title": "Open Source Advantages",
+      "content": "Fosters a vibrant, collaborative community ecosystem.\nEncourages creation of new integrations constantly.\nTransparent development process, visible to all.\nOffers flexibility and no vendor lock-in.\nAbility to contribute and shape the tool's future.",
+      "keyframe_path": null
+    },
+    {
+      "number": 4,
+      "title": "Building Automated Workflows",
+      "content": "Visual editor for intuitive workflow creation.\nConnect distinct nodes representing actions or services.\nExample: save email attachments to Google Drive.\nAutomatically notify your team via Slack messages.\nDesign complex logic without writing extensive code.\nTransform manual multi-step processes into automation.",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251222_185819_keyframes/keyframe_002_t14.85s.jpg"
+    },
+    {
+      "number": 5,
+      "title": "Practical Use Cases",
+      "content": "E-commerce: automate order processing flows.\nUpdate inventory and send shipping notifications.\nHR: streamline onboarding, create accounts fast.\nSend welcome emails and schedule meetings automatically.\nData teams: extract, transform, load from APIs.\nModify and manage data for various systems.",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251222_185819_keyframes/keyframe_003_t18.02s.jpg"
+    },
+    {
+      "number": 6,
+      "title": "Who Benefits from N8N?",
+      "content": "Business users tired of repetitive data entry.\nDevelopers seeking faster integration solutions.\nIT teams connecting diverse enterprise systems.\nEntrepreneurs scaling their business operations.\nAnyone aiming to automate their daily tasks.\nNo prior programming experience needed.",
+      "keyframe_path": null
+    },
+    {
+      "number": 7,
+      "title": "No Coding Required",
+      "content": "Build powerful automations without programming knowledge.\nIf you can draw a flowchart, you can build.\nVisual interface simplifies complex automation logic.\nAccessible for users of all technical levels.\nFocus on process, not syntax or intricate code.\nEmpowers non-developers to automate efficiently.",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251222_185819_keyframes/keyframe_004_t24.49s.jpg"
+    },
+    {
+      "number": 8,
+      "title": "Embrace Workflow Automation",
+      "content": "N8N empowers efficient task automation now.\nSay goodbye to time-consuming repetitive work.\nLearn to install N8N and set up your workspace.\nGet ready for hands-on automation next.\nTransform your productivity today with N8N.\nDiscover the power of visual automation.",
+      "keyframe_path": null
+    }
+  ],
+  "output_path": "/Users/falahi/VidScrib/outputs/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251222_185819.pptx",
+  "output_type": "ppt",
+  "template": "gradiant",
+  "processing_time": 89.73015904426575
+}

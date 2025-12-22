@@ -18,11 +18,18 @@ logger = logging.getLogger(__name__)
 class VideoPipeline:
     """Main pipeline for video processing"""
     
-    def __init__(self):
-        """Initialize pipeline with all components"""
+    def __init__(self, progress_callback=None):
+        """Initialize pipeline with all components
+        
+        Args:
+            progress_callback: Optional callable(progress: int, message: str) for progress updates
+        """
         logger.info("="*70)
         logger.info("🚀 INITIALIZING VIDEO PROCESSING PIPELINE")
         logger.info("="*70)
+        
+        # Store progress callback
+        self.progress_callback = progress_callback
         
         # Initialize components
         self.validator = VideoValidator()
@@ -86,6 +93,7 @@ class VideoPipeline:
             video_info = self.validator.get_video_info(video_path)
             results['video_info'] = video_info
             logger.info(f"✅ Video valid: {video_info['duration_formatted']}, {video_info['resolution']}")
+            self._update_progress(16, 'Video validated')
             
             # Generate output name
             if output_name is None:
@@ -105,6 +113,7 @@ class VideoPipeline:
             keyframe_paths = [kf[1] for kf in keyframes]
             results['keyframe_count'] = len(keyframes)
             logger.info(f"✅ Extracted {len(keyframes)} keyframes")
+            self._update_progress(33, f'Extracted {len(keyframes)} keyframes')
             
             # Step 3: Process audio and transcribe
             logger.info(f"\n{create_progress_message(3, 6, 'Transcribing audio with Whisper')}")
@@ -117,6 +126,7 @@ class VideoPipeline:
             results['transcript'] = transcript_data['text']
             results['language'] = transcript_data.get('language', 'unknown')
             logger.info(f"✅ Transcription complete: {len(transcript_data['text'])} characters")
+            self._update_progress(50, 'Audio transcribed')
             
             # Step 4: Generate captions for keyframes - DISABLED TO SAVE API CALLS
             logger.info(f"\n{create_progress_message(4, 6, 'Skipping captions (API optimization)')}")
@@ -128,6 +138,7 @@ class VideoPipeline:
             # results['captions'] = captions
             results['captions'] = []  # Empty - using transcript only
             logger.info(f"⚡ Skipped image captions to save API calls")
+            self._update_progress(66, 'Skipping captions (API optimization)')
             
             # Step 5: Create content summary
             logger.info(f"\n{create_progress_message(5, 6, 'Creating structured summary')}")
@@ -140,6 +151,7 @@ class VideoPipeline:
             results['overview'] = summary_data['overview']
             results['summary'] = summary_data['overview']  # For display
             logger.info(f"✅ Summary created: '{summary_data['title']}'")
+            self._update_progress(83, 'Content summarized')
             
             # Create slides data
             slides = []
@@ -205,6 +217,8 @@ class VideoPipeline:
             else:
                 raise ValueError(f"Invalid output format: {output_format}")
             
+            self._update_progress(100, 'Output generated successfully')
+            
             # Cleanup
             if config.AUTO_DELETE_TEMP:
                 FileHandler.cleanup_temp_files(output_name)
@@ -229,6 +243,14 @@ class VideoPipeline:
             results['status'] = 'error'
             results['error'] = str(e)
             return results
+    
+    def _update_progress(self, progress: int, message: str):
+        """Update progress via callback if available"""
+        if self.progress_callback:
+            try:
+                self.progress_callback(progress, message)
+            except Exception as e:
+                logger.warning(f"Progress callback error: {e}")
     
     def _generate_ppt(self, slides: list, output_name: str, 
                      summary_data: dict, template: str = None) -> str:

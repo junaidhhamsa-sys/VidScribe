@@ -1,0 +1,79 @@
+{
+  "status": "complete",
+  "video_path": "/Users/falahi/VidScrib/static/uploads/What_is_deja_vu_What_is_deja_vu_-_Michael_Molina_-_TED-Ed_720p_h264_20251222_194738.mp4",
+  "output_format": "ppt",
+  "start_time": 1766413058.116562,
+  "video_info": {
+    "duration_seconds": 234.859625,
+    "duration_formatted": "3:54",
+    "fps": 23.976023976023978,
+    "frame_count": 5631,
+    "resolution": "1280x720",
+    "width": 1280,
+    "height": 720,
+    "file_size_bytes": 5995502,
+    "file_size_mb": 5.717756271362305,
+    "format": ".mp4"
+  },
+  "keyframe_count": 4,
+  "transcript": " Have you experienced deja vu? It's that shadowy feeling you get when a situation seems familiar. A scene in a restaurant plays out exactly as you remember. The world moves like a ballet you've choreographed. But this sequence can't be based on the past experience because you've never eaten here before. This is the first time you've had clams. So what's going on? Unfortunately, there isn't one single explanation for deja vu. The experience is brief and occurs without notice, making it nearly impossible for scientists to record and study it. Scientists can't simply sit around and wait for it to happen to them. This could take years. It is no physical manifestations, and in studies, it's described by the subject as a sensation or feeling. Because of this lack of hard evidence, there's been a surplus of speculation over the years. As Emil Boirek introduced deja vu as a French term meaning already seen, more than 40 theories attempt to explain this phenomenon. Still, recent advancements in neuroimaging and cognitive psychology narrowed down the field of prospects. Let's walk through three of today's more prevalent theories using the same restaurant setting for each. First up is dual processing. We'll need an action. Let's go with a waiter dropping a tray of dishes. As the scene unfolds, your brain's hemispheres process of flurry of information. The waiter's flailing arms, his cry for help, the smell of pasta. Within milliseconds, this information zips through pathways and is processed into a single moment. Most of the time, everything is recorded in sync. However, this theory asserts that deja vu occurs when there is a slight delay in information from one of these pathways. The difference in arrival times causes the brain to interpret the late information as a separate event. When it plays over the already recorded moment, it feels as if it's happened before, because in a sense, it has. Our next theory deals with a confusion of the past, rather than a mistake in the present. This is the hologram theory, and we'll use that tablecloth to examine it. As you scan its squares, a distant memory swims up from deep within your brain. According to the theory, this is because memories are stored in the form of holograms, and in holograms, you only need one fragment to see the whole picture. Your brain has identified the tablecloth with one from the past, maybe from your grandmother's house. Instead of remembering that you've seen this pattern at your grandmother's, your brain has summoned up the old memory without identifying it. This leaves you stuck with familiarity, but no recollection. Although you've never been in this restaurant, you've seen that tablecloth but are just failing to identify it. Now look at this fork. Are you paying attention? Our last theory is divided attention, and it states that deja vu occurs when our brain subliminally takes in an environment while we're distracted by one particular object. What our attention returns, we feel as if we've been here before. For example, just now you focused on the fork and didn't observe the tablecloth or the falling waiter. Although your brain has been recording everything in your peripheral vision, it's been doing so below conscious awareness. When you finally pull yourself away from the fork, you think you've been here before because you have. You just weren't paying attention. While all three of these theories share the common features of deja vu, none of them propose to be the conclusive source of the phenomenon. Still, while we wait for researchers and inventors to come up with new ways to capture this fleeting moment, we can study the moment ourselves. After all, most studies of deja vu are based on first-hand accounts, so why can't one be yours? The next time you get deja vu, take a moment to think about it. Have you been distracted? Is there a familiar object somewhere? Is your brain just acting slow? Or is it something else?",
+  "language": "en",
+  "captions": [],
+  "title": "Understanding Deja Vu Phenomenon",
+  "overview": "Explore three prevalent theories explaining the elusive sensation of deja vu.",
+  "summary": "Explore three prevalent theories explaining the elusive sensation of deja vu.",
+  "slides": [
+    {
+      "number": 1,
+      "title": "What Is Deja Vu?",
+      "content": "Deja vu is a strange feeling that a situation is familiar.\nIt occurs when a new scene feels like a past experience.\nThis sensation is fleeting and happens without warning.\nScientists find it hard to record and study this phenomenon.\nIt is described solely as a subjective sensation or feeling.\nMany theories attempt to explain this mysterious experience.",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_is_deja_vu_What_is_deja_vu_-_Michael_Molina_-_TED-Ed_720p_h264_20251222_194738_keyframes/keyframe_000_t0.00s.jpg"
+    },
+    {
+      "number": 2,
+      "title": "The Dual Processing Theory",
+      "content": "Brain hemispheres process information simultaneously in milliseconds.\nPathways usually deliver information in sync for a single moment.\nDeja vu may occur due to a slight delay in one pathway.\nDifferent arrival times cause the brain to see a separate event.\nThe late information feels like a repeat of the recorded moment.\nThis makes the current experience seem like it has happened before.",
+      "keyframe_path": null
+    },
+    {
+      "number": 3,
+      "title": "The Hologram Theory",
+      "content": "Memories are stored in the brain as holographic fragments.\nA single fragment can recall an entire memory.\nDeja vu happens when a current scene matches a past memory.\nThe brain identifies a pattern, like a tablecloth's squares.\nIt summons the old memory without identifying the source.\nThis results in familiarity without a specific recollection.",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_is_deja_vu_What_is_deja_vu_-_Michael_Molina_-_TED-Ed_720p_h264_20251222_194738_keyframes/keyframe_001_t58.68s.jpg"
+    },
+    {
+      "number": 4,
+      "title": "The Divided Attention Theory",
+      "content": "Deja vu can happen when subliminally taking in surroundings.\nThis occurs while attention is focused on a specific object.\nThe brain records peripheral information below conscious awareness.\nWhen attention shifts back, the environment feels familiar.\nYou've processed the environment but weren't consciously aware.\nThis creates the feeling of having been there before.",
+      "keyframe_path": null
+    },
+    {
+      "number": 5,
+      "title": "Theories Compared [COMPARISON]",
+      "content": "Dual Processing: Sensory input processing delay.\nDual Processing: Misinterpretation of timing creates familiarity.\nDual Processing: Error in present moment processing.\nHologram Theory: Past memory fragment recognition.\nHologram Theory: Familiarity without conscious recall source.\nHologram Theory: Confusion of past memory.",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_is_deja_vu_What_is_deja_vu_-_Michael_Molina_-_TED-Ed_720p_h264_20251222_194738_keyframes/keyframe_002_t117.41s.jpg"
+    },
+    {
+      "number": 6,
+      "title": "Key Features of Deja Vu [FEATURES]",
+      "content": "Subjective Feeling: Primarily a personal sensation.\nBrief Duration: Occurs for a very short period.\nUnpredictable Onset: Happens spontaneously without warning.\nDifficult to Study: Lacks physical manifestations for recording.\nMultiple Explanations: Several scientific theories exist.\nCommon Experience: Reported by a significant portion of people.",
+      "keyframe_path": null
+    },
+    {
+      "number": 7,
+      "title": "Studying Deja Vu",
+      "content": "Scientists struggle to capture the fleeting deja vu moment.\nNeuroimaging and cognitive psychology offer new insights.\nMost studies rely on first-hand anecdotal accounts.\nResearchers can't force the experience for observation.\nNew methods are needed to record and analyze the phenomenon.\nPersonal observation remains a key research tool.",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_is_deja_vu_What_is_deja_vu_-_Michael_Molina_-_TED-Ed_720p_h264_20251222_194738_keyframes/keyframe_003_t176.09s.jpg"
+    },
+    {
+      "number": 8,
+      "title": "Reflecting on Deja Vu",
+      "content": "Consider if your attention was divided during the experience.\nLook for any familiar objects or patterns present.\nThink about potential processing delays in your brain.\nRemember that multiple theories attempt to explain it.\nEmbrace the mystery and observe your own sensations.\nDeja vu remains a fascinating aspect of human consciousness.",
+      "keyframe_path": null
+    }
+  ],
+  "output_path": "/Users/falahi/VidScrib/outputs/What_is_deja_vu_What_is_deja_vu_-_Michael_Molina_-_TED-Ed_720p_h264_20251222_194738.pptx",
+  "output_type": "ppt",
+  "template": "dark",
+  "processing_time": 32.06338620185852
+}

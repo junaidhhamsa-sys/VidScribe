@@ -22,18 +22,71 @@ const downloadBtn = document.getElementById('downloadBtn');
 const newVideoBtn = document.getElementById('newVideoBtn');
 const retryBtn = document.getElementById('retryBtn');
 
+// Toggle elements
+const uploadToggle = document.getElementById('uploadToggle');
+const youtubeToggle = document.getElementById('youtubeToggle');
+const uploadBox = document.getElementById('uploadBox');
+const youtubeBox = document.getElementById('youtubeBox');
+
 // ============================================================================
 // Initialization
 // ============================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeEventListeners();
+    initHeaderScroll();
     console.log('VidScribe initialized');
 });
 
+function initHeaderScroll() {
+    const header = document.querySelector('.nav-header');
+    let lastScrollTop = 0;
+    let scrollThreshold = 100; // Start hiding after scrolling 100px
+
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+        if (scrollTop > scrollThreshold) {
+            if (scrollTop > lastScrollTop) {
+                // Scrolling down - hide header
+                header.classList.add('hidden');
+            } else {
+                // Scrolling up - show header
+                header.classList.remove('hidden');
+            }
+        } else {
+            // Near top - always show header
+            header.classList.remove('hidden');
+        }
+
+        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+    }, false);
+}
+
 function initializeEventListeners() {
+    // Toggle radio buttons for upload/YouTube
+    const uploadRadio = document.getElementById('uploadToggle');
+    const youtubeRadio = document.getElementById('youtubeToggle');
+
+    if (uploadRadio) {
+        uploadRadio.addEventListener('change', () => {
+            if (uploadRadio.checked) {
+                switchInputMode('upload');
+            }
+        });
+    }
+    if (youtubeRadio) {
+        youtubeRadio.addEventListener('change', () => {
+            if (youtubeRadio.checked) {
+                switchInputMode('youtube');
+            }
+        });
+    }
+
     // File input change
-    videoFileInput.addEventListener('change', handleFileSelect);
+    if (videoFileInput) {
+        videoFileInput.addEventListener('change', handleFileSelect);
+    }
 
     // Form submit
     uploadForm.addEventListener('submit', handleFormSubmit);
@@ -44,9 +97,101 @@ function initializeEventListeners() {
     });
 
     // Action buttons
-    downloadBtn.addEventListener('click', handleDownload);
-    newVideoBtn.addEventListener('click', resetApp);
-    retryBtn.addEventListener('click', resetApp);
+    if (downloadBtn) downloadBtn.addEventListener('click', handleDownload);
+    if (newVideoBtn) newVideoBtn.addEventListener('click', resetApp);
+    if (retryBtn) retryBtn.addEventListener('click', resetApp);
+
+    // 3D Template Carousel
+    initTemplateCarousel();
+}
+
+// ============================================================================
+// Template Flip Card Selection
+// ============================================================================
+
+function initTemplateCarousel() {
+    const templateCards = document.querySelectorAll('.template-flip-card');
+    const selectedNameDisplay = document.querySelector('.selected-template-name');
+
+    if (!templateCards.length) return;
+
+    // Click to select
+    templateCards.forEach(card => {
+        card.addEventListener('click', function (e) {
+            e.stopPropagation();
+
+            const templateValue = this.dataset.template;
+            const radioInput = this.querySelector('input[type="radio"]');
+            const labelText = this.querySelector('.card__title').textContent;
+
+            // Update radio selection
+            if (radioInput) {
+                radioInput.checked = true;
+            }
+
+            // Update visual selection
+            templateCards.forEach(c => c.classList.remove('selected'));
+            this.classList.add('selected');
+
+            // Update selected template name
+            if (selectedNameDisplay) {
+                selectedNameDisplay.textContent = labelText;
+            }
+        });
+    });
+
+    // Set initial selected state
+    const checkedInput = document.querySelector('.template-flip-card input[type="radio"]:checked');
+    if (checkedInput) {
+        const selectedCard = checkedInput.closest('.template-flip-card');
+        if (selectedCard) {
+            selectedCard.classList.add('selected');
+        }
+    }
+}
+
+// ============================================================================
+// YouTube URL Handler
+// ============================================================================
+
+function handleYouTubeUrl() {
+    const urlInput = document.getElementById('youtubeUrl');
+    const url = urlInput.value.trim();
+
+    if (!url) {
+        alert('Please enter a YouTube URL');
+        return;
+    }
+
+    // Basic YouTube URL validation
+    if (!url.includes('youtube.com') && !url.includes('youtu.be')) {
+        alert('Please enter a valid YouTube URL');
+        return;
+    }
+
+    // URL is valid, you can add additional processing here
+    console.log('YouTube URL selected:', url);
+    // The form will handle the submission
+}
+
+// ============================================================================
+// Toggle Input Mode
+// ============================================================================
+
+function switchInputMode(mode) {
+    if (mode === 'upload') {
+        // Activate upload mode
+        uploadToggle.classList.add('active');
+        youtubeToggle.classList.remove('active');
+        uploadBox.classList.remove('hidden');
+        youtubeBox.classList.add('hidden');
+    } else if (mode === 'youtube') {
+        // Activate YouTube mode
+        youtubeToggle.classList.add('active');
+        uploadToggle.classList.remove('active');
+        youtubeBox.classList.remove('hidden');
+        uploadBox.classList.add('hidden');
+    }
 }
 
 
@@ -67,15 +212,34 @@ function handleImageError(img) {
 
 function handleFileSelect(event) {
     const file = event.target.files[0];
+    const uploadText = document.getElementById('uploadText');
+    const selectedFileName = document.getElementById('selectedFileName');
+    const fileButtonText = document.getElementById('fileButtonText');
+    const folderContainer = document.querySelector('.folder-container');
 
     if (file) {
-        // Update display
-        fileNameDisplay.textContent = file.name;
-        fileLabel.classList.add('has-file');
-
         // Show file info
         const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-        fileNameDisplay.textContent = `${file.name} (${sizeMB} MB)`;
+
+        // Update UI to show selected file
+        if (uploadText) {
+            uploadText.textContent = 'Video uploaded successfully!';
+            uploadText.style.color = '#28a745'; // Green color for success
+        }
+
+        if (selectedFileName) {
+            selectedFileName.textContent = `📹 ${file.name} (${sizeMB} MB)`;
+            selectedFileName.style.display = 'block';
+        }
+
+        if (fileButtonText) {
+            fileButtonText.textContent = 'Change file';
+        }
+
+        // Add success class to folder container
+        if (folderContainer) {
+            folderContainer.classList.add('file-uploaded');
+        }
 
         console.log('File selected:', file.name);
     }
@@ -179,8 +343,34 @@ async function checkStatus() {
 
             if (data.status === 'complete') {
                 stopStatusChecking();
-                // Redirect to the new results page
-                window.location.href = `/results/${currentOutputName}`;
+
+                // Instead of redirecting, fetch results and show inline
+                const resultsResponse = await fetch(`/results/${currentOutputName}`);
+                const resultsHtml = await resultsResponse.text();
+
+                // Extract results data from the response HTML
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(resultsHtml, 'text/html');
+                const resultsDataEl = doc.getElementById('resultsData');
+
+                if (resultsDataEl) {
+                    // Copy the data element to current page
+                    const currentResultsData = document.getElementById('resultsData');
+                    if (currentResultsData) {
+                        currentResultsData.dataset.slides = resultsDataEl.dataset.slides;
+                        currentResultsData.dataset.outputName = resultsDataEl.dataset.outputName;
+                        currentResultsData.dataset.template = resultsDataEl.dataset.template;
+                        currentResultsData.dataset.title = resultsDataEl.dataset.title;
+                    }
+
+                    // Load and show results
+                    if (loadResultsData()) {
+                        showResults();
+                    }
+                } else {
+                    // Fallback: redirect to results page
+                    window.location.href = `/results/${currentOutputName}`;
+                }
             } else if (data.status === 'error') {
                 stopStatusChecking();
                 showError(data.message);
@@ -381,3 +571,155 @@ function formatTime(seconds) {
 console.log('%c🎬 VidScribe', 'font-size: 24px; font-weight: bold; color: #2563eb;');
 console.log('%cAI-Powered Video Summarization', 'font-size: 14px; color: #64748b;');
 console.log('%cPowered by OpenCV, Whisper & Gemini AI', 'font-size: 12px; color: #94a3b8;');
+// ============================================================================
+// Results Viewing (Merged from results.js)
+// ============================================================================
+
+let currentSlide = 1;
+let totalSlides = 1;
+let slidesData = [];
+let resultsOutputName = '';
+let selectedResultTemplate = 'professional';
+
+function loadResultsData() {
+    const resultsDataEl = document.getElementById('resultsData');
+    if (!resultsDataEl) return false;
+
+    try {
+        const slidesJson = resultsDataEl.dataset.slides;
+        const outputName = resultsDataEl.dataset.outputName;
+        const template = resultsDataEl.dataset.template;
+        const title = resultsDataEl.dataset.title;
+
+        if (!slidesJson || slidesJson === '[]') {
+            console.log('No results data found');
+            return false;
+        }
+
+        slidesData = JSON.parse(slidesJson);
+        totalSlides = slidesData.length;
+        resultsOutputName = outputName;
+        selectedResultTemplate = template;
+
+        console.log('✅ Loaded results data:', {
+            slides: totalSlides,
+            outputName: resultsOutputName,
+            template: selectedResultTemplate
+        });
+
+        const titleEl = document.getElementById('presentationTitle');
+        if (titleEl && title) titleEl.textContent = title;
+
+        return true;
+    } catch (error) {
+        console.error('Error loading results data:', error);
+        return false;
+    }
+}
+
+function showResults() {
+    uploadSection.classList.add('hidden');
+    processingSection.classList.add('hidden');
+    errorSection.classList.add('hidden');
+    document.getElementById('resultsSection').classList.remove('hidden');
+    initResultsViewing();
+}
+
+function initResultsViewing() {
+    const regenerateBtn = document.getElementById('regenerateBtn');
+    const downloadResultBtn = document.getElementById('downloadResultBtn');
+    const processAnotherBtn = document.getElementById('processAnotherBtn');
+
+    if (regenerateBtn) {
+        regenerateBtn.addEventListener('click', handleRegenerateTemplate);
+    }
+
+    if (downloadResultBtn) {
+        downloadResultBtn.addEventListener('click', () => {
+            if (resultsOutputName) {
+                window.location.href = `/download/${resultsOutputName}`;
+            }
+        });
+    }
+
+    if (processAnotherBtn) {
+        processAnotherBtn.addEventListener('click', resetToUpload);
+    }
+
+    console.log('✅ Results buttons initialized');
+}
+
+async function handleRegenerateTemplate() {
+    const templateDropdown = document.getElementById('templateDropdown');
+    const regenerateBtn = document.getElementById('regenerateBtn');
+    const statusDiv = document.getElementById('regenerateStatus');
+    const successDiv = document.getElementById('regenerateSuccess');
+    const selectedTemplate = templateDropdown.value;
+
+    console.log(`🔄 Regenerating PPT with template: ${selectedTemplate}`);
+
+    regenerateBtn.disabled = true;
+    statusDiv.classList.remove('hidden');
+    successDiv.classList.add('hidden');
+
+    try {
+        const response = await fetch(`/regenerate-ppt/${resultsOutputName}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ template: selectedTemplate })
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.status === 'success') {
+            console.log('✅ PPT regenerated successfully!');
+
+            statusDiv.classList.add('hidden');
+            successDiv.classList.remove('hidden');
+
+            setTimeout(() => {
+                window.location.href = result.download_url;
+
+                setTimeout(() => {
+                    successDiv.classList.add('hidden');
+                    regenerateBtn.disabled = false;
+                }, 2000);
+            }, 500);
+        } else {
+            throw new Error(result.error || 'Regeneration failed');
+        }
+    } catch (error) {
+        console.error('❌ Regeneration error:', error);
+        statusDiv.classList.add('hidden');
+        regenerateBtn.disabled = false;
+        alert(`Failed to regenerate PPT: ${error.message}`);
+    }
+}
+
+function resetToUpload() {
+    stopStatusChecking();
+
+    currentSlide = 1;
+    totalSlides = 1;
+    slidesData = [];
+    resultsOutputName = '';
+
+    document.getElementById('resultsSection').classList.add('hidden');
+    processingSection.classList.add('hidden');
+    errorSection.classList.add('hidden');
+
+    uploadSection.classList.remove('hidden');
+
+    uploadForm.reset();
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', () => {
+        if (loadResultsData()) {
+            showResults();
+        }
+    });
+}
+
