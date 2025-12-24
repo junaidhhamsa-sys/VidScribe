@@ -309,8 +309,9 @@ class GeminiProcessor:
             try:
                 prompt = f"""
                 🚨 CRITICAL REQUIREMENT - READ FIRST 🚨
-                You MUST include AT LEAST ONE slide with [COMPARISON] or [FEATURES] tag.
-                This is MANDATORY and NON-NEGOTIABLE. The presentation will fail if this is missing.
+                You MUST include 1-2 slides (MAXIMUM 2!) with [COMPARISON] or [FEATURES] tags.
+                Most slides should be REGULAR slides (no tags).
+                Use [FEATURES]/[COMPARISON] only for truly list-like or comparative content.
                 
                 You are creating a PROFESSIONAL POWERPOINT PRESENTATION from a video transcript.
                 This presentation will use an educational template with 5 different slide layouts.
@@ -321,20 +322,35 @@ class GeminiProcessor:
                 
                 Your slides will be mapped to different visual templates based on content type:
                 
-                1. REGULAR TOPIC SLIDE:
-                   - Use for: Standard topics with bullet points
+                1. 📘 REGULAR TOPIC SLIDE (USE FOR MOST SLIDES - 80% OF PRESENTATION):
+                   - Use for: Standard topics, explanations, concepts, details
                    - Format: Title + 4-6 bullet points
+                   - NO special tags needed
+                   - This should be your DEFAULT choice
                    
-                2. 🔴 COMPARISON/FEATURE SLIDE (MANDATORY - MUST USE AT LEAST ONCE!):
-                   - Use for: Pros vs Cons, Before vs After, Feature Lists, Comparisons, Benefits
+                2. 🔴 COMPARISON/FEATURE SLIDE (USE SPARINGLY - ONLY 1-2 PER PRESENTATION!):
+                   - Use for: ONLY when content is inherently list-like or comparative
                    - Format: Title + exactly 6 bullets (will be split into 3 columns × 2 points each)
                    - Mark with: [COMPARISON] or [FEATURES] tag after title
-                   - Examples: "N8N vs Zapier [COMPARISON]", "Key Features [FEATURES]"
-                   - 🚨 YOU MUST CREATE AT LEAST ONE OF THESE SLIDES 🚨
+                   
+                   🎯 WHEN TO USE [FEATURES] OR [COMPARISON] SLIDES (SELECTIVE USE ONLY):
+                   ✅ Component breakdowns with 6+ distinct parts (e.g., "Core Components")
+                   ✅ Direct comparisons (e.g., "X vs Y", "Before vs After")
+                   ✅ Explicit feature lists (e.g., "Key Features")
+                   ❌ DON'T use for: Regular explanations, how-to content, general topics
+                   ❌ DON'T use for: Steps, processes, or sequential content
+                   ❌ DON'T overuse - MAXIMUM 2 per presentation!
+                   
+                   📝 GOOD EXAMPLES (USE ONLY 1-2 OF THESE):
+                   - "Core Components [FEATURES]" - when video explicitly lists 6 components
+                   - "Traditional vs Agentic AI [COMPARISON]" - when comparing two approaches
+                   - "Framework Options [FEATURES]" - when listing multiple framework options
+                   
+                   🚨 LIMIT: Use this ONLY 1-2 times per presentation!
                    
                 3. IMAGE SLIDE:
                    - Automatically assigned when keyframe images are available
-                   - Format: Title + 3-4 brief bullet points
+                   - Format: Title + 3-6 bullet points
                 
                 ═══════════════════════════════════════════════════════════
                 CRITICAL REQUIREMENTS:
@@ -342,8 +358,8 @@ class GeminiProcessor:
                 
                 1. SLIDE TITLES - MUST BE CONCISE AND DESCRIPTIVE:
                    ✅ DO: "What is N8N?"
-                   ✅ DO: "Key Features of N8N"
-                   ✅ DO: "N8N vs Zapier"
+                   ✅ DO: "How It Works"
+                   ✅ DO: "Building Your Agent"
                    ❌ DON'T: "Section 1", "Introduction", "Overview"
                    ❌ DON'T: Long titles with more than 5 words
                    
@@ -354,15 +370,17 @@ class GeminiProcessor:
                 
                 2. BULLET POINTS:
                    - Regular slides: 4-6 bullets
-                   - Comparison slides: EXACTLY 6 bullets (3 columns × 2 points each)
+                   - Comparison/Feature slides: EXACTLY 6 bullets (3 columns × 2 points each)
                    - Each bullet: 8-12 words maximum
                    - Start with action verbs or key nouns
                    - Complete, self-contained thoughts
                 
-                3. 🚨 CONTENT VARIETY (MANDATORY!):
-                   - YOU MUST include AT LEAST 1 comparison or feature slide with [COMPARISON] or [FEATURES] tag
-                   - Look for: pros/cons, before/after, features, comparisons, benefits in transcript
-                   - If none exist in content, you MUST CREATE one feature list or comparison anyway
+                3. 🚨 CONTENT VARIETY (BALANCED APPROACH!):
+                   - MOST slides (80-85%) should be REGULAR slides with NO tags
+                   - ONLY 1-2 slides should have [COMPARISON] or [FEATURES] tags
+                   - Use regular slides for: explanations, steps, how-tos, concepts
+                   - Use feature slides for: explicit lists, comparisons, component breakdowns
+                   - Strategy: Be SELECTIVE - not every list needs to be [FEATURES]
                 
                 ═══════════════════════════════════════════════════════════
                 REQUIRED OUTPUT FORMAT:
@@ -370,10 +388,9 @@ class GeminiProcessor:
                 
                 TITLE:
                 [Specific video title from content - max 5 words]
-                Example: "Introduction to N8N Automation"
                 
                 SUBTITLE:
-                [maximum 1 sentences summarizing the presentation]
+                [maximum 1 sentence summarizing the presentation]
                 
                 SLIDE 1: [Specific Descriptive Title]
                 - Bullet point 1 (8-12 words)
@@ -381,40 +398,32 @@ class GeminiProcessor:
                 - Bullet point 3 (8-12 words)
                 - Bullet point 4 (8-12 words)
                 - Bullet point 5 (8-12 words)
-                - Bullet point 6 (8-12 words, maximum)
                 
-                SLIDE 2: [Another Specific Title]  
-                - Bullet 1
-                - Bullet 2
-                - Bullet 3
-                - Bullet 4
-                
-                SLIDE 3: [Title for Comparison/Features] [COMPARISON]
-                - First point for left column
-                - Second point for left column  
-                - Third point for left column
-                - First point for right column
-                - Second point for right column
-                - Third point for right column
-                ⚠️  MANDATORY: You MUST include at least ONE slide with [COMPARISON] or [FEATURES] tag!
-                    This slide must have EXACTLY 6 bullets (3 columns × 2 points each).
-                    Examples: "N8N vs Zapier" [COMPARISON], "Key Features of N8N" [FEATURES]
-                    NOTE: Comparison slides should NOT have images, only text bullets!
-                
-                SLIDE 4: [Specific Title - for keyframe image]
-                - Brief caption point 1 (if image is present)
-                - Brief caption point 2
-                - Brief caption point 3
-                - Brief caption point 4 (maximum 4 bullets for image captions)
+                SLIDE 2: [Another Topic Title]
                 - Bullet 1
                 - Bullet 2
                 - Bullet 3
                 - Bullet 4
                 - Bullet 5
                 
-                [Continue for remaining slides...]
+                SLIDE 3: [Title for Features] [FEATURES]
+                - Feature 1
+                - Feature 2
+                - Feature 3
+                - Feature 4
+                - Feature 5
+                - Feature 6
+                ⚠️  EXACTLY 6 bullets for [FEATURES]/[COMPARISON] slides!
                 
-                SLIDE {num_sections}: [Concluding Title - Not "Key Takeaways"]
+                SLIDE 4: [Regular Topic Title]
+                - Bullet 1
+                - Bullet 2
+                - Bullet 3
+                - Bullet 4
+                
+                [Continue with REGULAR slides for most content...]
+                
+                SLIDE {num_sections}: [Concluding Title]
                 - Takeaway 1
                 - Takeaway 2
                 - Takeaway 3
@@ -425,32 +434,26 @@ class GeminiProcessor:
                 ═══════════════════════════════════════════════════════════
                 
                 - Create exactly {num_sections} slides total
-                - FIRST SLIDE: Introduce the main topic
-                - MIDDLE SLIDES: Cover key concepts
-                - 🔴 CRITICAL: At least ONE slide MUST have [COMPARISON] or [FEATURES] tag with 6 bullets
-                - LAST SLIDE: Summarize or provide conclusion
+                - 🔴 CRITICAL: MAXIMUM 2 slides with [COMPARISON] or [FEATURES] tags
+                - MOST slides should be REGULAR slides (no special tags)
+                - Use regular slides for: explanations, how-tos, concepts, details
+                - Use [FEATURES] only for: explicit lists, comparisons, component breakdowns
                 - [COMPARISON]/[FEATURES] slides: 6 bullets (3 columns × 2 points), NO images
-                - Picture slides with keyframes: Maximum 4 caption bullets
-                - Regular content slides: 4-6 bullets (MAX 6)
+                - Regular slides: 4-6 bullets (MAX 6)
                 - DO NOT create a "Table of Contents" or "Agenda" slide - it will be auto-generated
                 - Ensure logical flow between slides
                 - Use CONCISE titles - MAX 5 WORDS (not generic)
                 
                 ═══════════════════════════════════════════════════════════
-                EXAMPLES OF GOOD TITLES (MAX 5 WORDS):
+                EXAMPLE DISTRIBUTION (for 15 slides):
                 ═══════════════════════════════════════════════════════════
                 
-                ✅ "What is N8N?"
-                ✅ "How Nodes Connect"
-                ✅ "N8N vs Zapier" [COMPARISON]
-                ✅ "Key Features of N8N" [FEATURES]
-                ✅ "Building Your First Workflow"
-                ✅ "Self-Hosting Benefits" [COMPARISON]
+                Slides 1-14: REGULAR slides (no tags)
+                Slide 3: [FEATURES] slide (if content has explicit feature list)
+                Slide 8: [COMPARISON] slide (if content has comparison)
+                Slide 15: REGULAR conclusion slide
                 
-                ❌ "Section 1"
-                ❌ "Introduction"
-                ❌ "Overview"
-                ❌ "Part 2"
+                👉 Notice: Only 2 out of 15 slides use special tags!
                 
                 ═══════════════════════════════════════════════════════════
                 TRANSCRIPT TO ANALYZE:

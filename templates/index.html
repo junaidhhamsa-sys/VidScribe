@@ -349,10 +349,10 @@ h78.747C231.693,100.736,232.77,106.162,232.77,111.694z"></path>
       <!-- Error Section -->
       <section class="error-section hidden" id="errorSection">
         <div class="card error-card">
-          <h2>❌ Error</h2>
+          <h2>Error</h2>
           <p class="error-message" id="errorMessage"></p>
           <button class="btn btn-secondary" id="retryBtn">
-            <span>🔄 Try Again</span>
+            <span>Try Again</span>
           </button>
         </div>
       </section>
@@ -361,19 +361,34 @@ h78.747C231.693,100.736,232.77,106.162,232.77,111.694z"></path>
       <section class="results-section hidden" id="resultsSection">
         <div class="results-header">
           <h2 id="presentationTitle">Presentation Results</h2>
-          <div class="results-actions">
-            <button class="btn btn-secondary" id="processAnotherBtn">
-              🔄 Process Another Video
-            </button>
-            <button class="btn btn-success" id="downloadResultBtn">
-              📥 Download
-            </button>
-          </div>
         </div>
 
         <div class="results-simple-container">
           <!-- Template Selector Card -->
           <div class="template-selector-card">
+
+            <!-- Video Details Summary -->
+            <div class="video-summary-section">
+              <div class="summary-stats">
+                <h4 style="grid-column: 1 / -1; margin: 0 0 1rem 0; font-size: 1.25rem; color: #1e293b;">Presentation
+                  Summary</h4>
+                <div class="stat-item">
+                  <span class="stat-label">Total Slides:</span>
+                  <span class="stat-value" id="slidesCount">-</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Template:</span>
+                  <span class="stat-value" id="currentTemplate">-</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Format:</span>
+                  <span class="stat-value">PowerPoint (.pptx)</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
             <div class="template-header">
               <h3>Template</h3>
             </div>
@@ -399,6 +414,15 @@ h78.747C231.693,100.736,232.77,106.162,232.77,111.694z"></path>
                 Regenerate PPT
               </button>
 
+              <div class="action-buttons-group">
+                <button class="btn btn-success" id="downloadResultBtn">
+                  Download
+                </button>
+                <button class="btn btn-secondary" id="processAnotherBtn">
+                  Process Another Video
+                </button>
+              </div>
+
               <div id="regenerateStatus" class="regenerate-status hidden">
                 <div class="spinner"></div>
                 <span>Regenerating presentation...</span>
@@ -414,7 +438,7 @@ h78.747C231.693,100.736,232.77,106.162,232.77,111.694z"></path>
             </div>
 
             <div class="template-info-box">
-              <p><strong>💡 Pro Tip:</strong> Test different templates without re-processing!</p>
+              <p><strong>Pro Tip:</strong> Test different templates without re-processing!</p>
               <p class="template-note">No Gemini API calls during regeneration.</p>
             </div>
           </div>

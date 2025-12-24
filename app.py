@@ -39,52 +39,94 @@ def index():
 
 @app.route('/upload', methods=['POST'])
 def upload_video():
-    """Handle video upload"""
+    """Handle video upload or YouTube URL"""
     
     logger.info("Upload request received")
     
-    # Check if file exists
-    if 'video' not in request.files:
-        return jsonify({'error': config.ERROR_MESSAGES['no_file']}), 400
-    
-    file = request.files['video']
-    
-    if file.filename == '':
-        return jsonify({'error': config.ERROR_MESSAGES['no_file']}), 400
+    # Check for YouTube URL first
+    youtube_url = request.form.get('youtube_url', '').strip()
     
     # Get form parameters
     output_format = request.form.get('output_format', 'ppt')
-    # Template selection happens on results page, use default for initial processing
     template = request.form.get('ppt_template', config.DEFAULT_TEMPLATE)
     
-    logger.info(f"Upload details: format={output_format}, template={template}")
-
+    filepath = None
+    video_info = None
+    output_name = None
     
     try:
-        # Save uploaded file
-        filename = secure_filename(file.filename)
-        unique_filename = get_unique_filename(filename)
-        filepath = file_handler.save_upload(file, unique_filename)
+        # Handle YouTube URL
+        if youtube_url:
+            from utils.youtube_downloader import YouTubeDownloader
+            
+            logger.info(f"YouTube URL provided: {youtube_url}")
+            
+            # Validate YouTube URL
+            if not YouTubeDownloader.is_valid_youtube_url(youtube_url):
+                return jsonify({'error': 'Invalid YouTube URL. Please provide a valid YouTube video link.'}), 400
+            
+            # Download video
+            downloader = YouTubeDownloader(config.UPLOAD_FOLDER)
+            
+            try:
+                success, result = downloader.download_video(youtube_url)
+                
+                if not success:
+                    logger.error(f"YouTube download failed: {result}")
+                    return jsonify({'error': f'Failed to download YouTube video: {result}'}), 400
+                
+                filepath = result
+                logger.info(f"YouTube video downloaded: {filepath}")
+                
+                # Get video info
+                video_info = validator.get_video_info(filepath)
+                
+                # Generate processing ID from downloaded filename
+                output_name = Path(filepath).stem
+                
+            except Exception as download_error:
+                logger.error(f"YouTube download error: {download_error}")
+                return jsonify({'error': f'Failed to download YouTube video: {str(download_error)}'}), 400
         
-        logger.info(f"File saved: {filepath}")
+        # Handle file upload
+        else:
+            # Check if file exists
+            if 'video' not in request.files:
+                return jsonify({'error': config.ERROR_MESSAGES['no_file']}), 400
+            
+            file = request.files['video']
+            
+            if file.filename == '':
+                return jsonify({'error': config.ERROR_MESSAGES['no_file']}), 400
+            
+            logger.info(f"File upload: {file.filename}")
+            
+            # Save uploaded file
+            filename = secure_filename(file.filename)
+            unique_filename = get_unique_filename(filename)
+            filepath = file_handler.save_upload(file, unique_filename)
+            
+            logger.info(f"File saved: {filepath}")
+            
+            # Validate video
+            is_valid, error = validator.validate_file(filepath)
+            if not is_valid:
+                file_handler.delete_file(filepath)
+                return jsonify({'error': error}), 400
+            
+            # Get video info
+            video_info = validator.get_video_info(filepath)
+            
+            # Generate processing ID
+            output_name = Path(unique_filename).stem
         
-        # Validate video
-        is_valid, error = validator.validate_file(filepath)
-        if not is_valid:
-            file_handler.delete_file(filepath)
-            return jsonify({'error': error}), 400
-        
-        # Get video info
-        video_info = validator.get_video_info(filepath)
-        
-        # Generate processing ID
-        output_name = Path(unique_filename).stem
+        logger.info(f"Upload details: format={output_format}, template={template}, output_name={output_name}")
         
         # Initialize processing status
         processing_status[output_name] = {
             'status': 'queued',
             'progress': 0,
-            'message': 'Video uploaded successfully'
+            'message': 'Video uploaded successfully' if not youtube_url else 'YouTube video downloaded successfully'
         }
         
         # Start processing in background thread
@@ -105,11 +147,16 @@ def upload_video():
                 'resolution': video_info['resolution'],
                 'size': f"{video_info['file_size_mb']:.2f} MB"
             },
-            'message': 'Video uploaded and processing started'
+            'message': 'Video uploaded and processing started' if not youtube_url else 'YouTube video downloaded and processing started'
         })
         
     except Exception as e:
         logger.error(f"Upload error: {e}", exc_info=True)
+        if filepath and Path(filepath).exists():
+            try:
+                file_handler.delete_file(filepath)
+            except Exception:
+                pass
         return jsonify({'error': str(e)}), 500
 
 

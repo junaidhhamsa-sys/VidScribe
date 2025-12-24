@@ -271,7 +271,11 @@ class PPTGenerator:
                 
                 # Check for keyframe (will be added later in the pipeline)
                 keyframe_path = section.get('keyframe_path', None)
-                if keyframe_path:
+                
+                # CRITICAL: Prioritize comparison layout over image layout
+                # If slide is marked as comparison/features, keep that layout even if it has a keyframe
+                # Only use image layout if it's NOT a comparison slide
+                if keyframe_path and layout_type != 'comparison':
                     layout_type = 'image'
                 
                 # Normalize title (remove tags for storage, we'll re-detect them later)
@@ -301,10 +305,12 @@ class PPTGenerator:
                     'validated': False
                 })
         
-        # 🚨 CRITICAL VALIDATION: Ensure at least one comparison slide exists
-        has_comparison = any(slide['layout_type'] == 'comparison' for slide in validated_slides)
+        # 🚨 CRITICAL VALIDATION: Enforce 1-2 comparison slides (not more, not less)
+        comparison_slides = [slide for slide in validated_slides if slide['layout_type'] == 'comparison']
+        comparison_count = len(comparison_slides)
         
-        if not has_comparison and len(validated_slides) > 1:
+        if comparison_count == 0 and len(validated_slides) > 1:
+            # No comparison slides - create ONE
             logger.warning("⚠️  NO COMPARISON SLIDE FOUND! Creating one automatically...")
             
             # Convert the second-to-last slide into a comparison slide
@@ -327,8 +333,28 @@ class PPTGenerator:
             target_slide['content'] = '\n'.join(bullets)
             
             logger.warning(f"✅ Converted slide '{target_slide['title']}' to FEATURES slide (Layout 2)")
-        elif has_comparison:
-            logger.info(f"✅ Found {sum(1 for s in validated_slides if s['layout_type'] == 'comparison')} comparison/features slide(s)")
+            logger.info(f"✅ Final count: 1 comparison/features slide")
+            
+        elif comparison_count > 2:
+            # Too many comparison slides - convert extras back to regular
+            logger.warning(f"⚠️  TOO MANY COMPARISON SLIDES ({comparison_count})! Limiting to 2...")
+            
+            # Keep first 2, convert rest to regular
+            comparison_indices = [i for i, slide in enumerate(validated_slides) if slide['layout_type'] == 'comparison']
+            slides_to_convert = comparison_indices[2:]  # Convert slides beyond the first 2
+            
+            for idx in slides_to_convert:
+                validated_slides[idx]['layout_type'] = 'regular'
+                # Remove tags from original title
+                validated_slides[idx]['original_title'] = validated_slides[idx]['title']
+                logger.info(f"  ♻️  Converted slide '{validated_slides[idx]['title']}' back to REGULAR slide")
+            
+            logger.info(f"✅ Final count: 2 comparison/features slides (limited from {comparison_count})")
+            
+        else:
+            # 1-2 comparison slides - perfect!
+            logger.info(f"✅ Found {comparison_count} comparison/features slide(s) - PERFECT!")
+
         
         logger.info(f"✅ Validated {len(validated_slides)} slides successfully")
         return validated_slides
@@ -341,6 +367,11 @@ class PPTGenerator:
         - Determine which layout (0-4) to use
         - Based on layout_type, keyframe presence, and index
         
+        PRIORITY ORDER:
+        1. Comparison/Features slides (Layout 2) - even if they have keyframes
+        2. Image slides with keyframes (Layout 3)  
+        3. Regular content slides (Layouts 1 & 4) - alternate for variety
+        
         Args:
             slide_data: Validated slide dict
             slide_index: Index in slides array (for alternating)
@@ -351,17 +382,19 @@ class PPTGenerator:
         layout_type = slide_data.get('layout_type', 'regular')
         has_keyframe = bool(slide_data.get('keyframe_path'))
         
-        # Layout 3: Images/Keyframes
-        if has_keyframe or layout_type == 'image':
-            logger.debug(f"  Layout 3 (Picture) ← Slide {slide_index+1}: keyframe")
-            return 3
-        
-        # Layout 2: 3-column Comparisons
+        # PRIORITY 1: Layout 2 - 3-column Comparisons/Features
+        # These take precedence even if they have keyframes
         if layout_type == 'comparison':
             logger.debug(f"  Layout 2 (Comparison) ← Slide {slide_index+1}: comparison/features")
             return 2
         
-        # Layouts 1 & 4: Alternate for regular content
+        # PRIORITY 2: Layout 3 - Images/Keyframes  
+        # Only use picture layout if NOT a comparison slide
+        if has_keyframe or layout_type == 'image':
+            logger.debug(f"  Layout 3 (Picture) ← Slide {slide_index+1}: keyframe")
+            return 3
+        
+        # PRIORITY 3: Layouts 1 & 4 - Alternate for regular content
         layout_idx = 1 if slide_index % 2 == 0 else 4
         logger.debug(f"  Layout {layout_idx} (Regular) ← Slide {slide_index+1}: regular content")
         return layout_idx
@@ -802,18 +835,26 @@ class PPTGenerator:
         """
         Fill placeholders in Layout 3 (Picture with Caption)
         
-        Layout 3 placeholders: [1]=Picture, [0]=Title, [10]=Content/Caption
+        Layout 3 placeholders: [1]=Picture, [0]=Title, [10 or 2 or 11]=Content/Caption
         """
         try:
             title = slide_data.get('title', 'Untitled')
             content = slide_data.get('content', '')
             keyframe_path = slide_data.get('keyframe_path')
             
+            # Log all available placeholders for debugging
+            logger.info(f"📸 Picture layout for '{title}' - Available placeholders:")
+            for ph in slide.placeholders:
+                if hasattr(ph, 'placeholder_format'):
+                    logger.info(f"  idx={ph.placeholder_format.idx}, type={ph.placeholder_format.type}, name={ph.name if hasattr(ph, 'name') else 'N/A'}")
+            
             # Fill title in placeholder idx=0
             title_ph = self._get_placeholder_by_idx(slide, 0)
             if title_ph:
                 title_ph.text = title
-                logger.debug(f"Filled title in placeholder idx=0")
+                logger.info(f"✅ Filled title in placeholder idx=0: '{title}'")
+            else:
+                logger.warning(f"❌ Could not find title placeholder (idx=0)")
             
             # Insert picture in placeholder idx=1
             if keyframe_path and Path(keyframe_path).exists():
@@ -821,31 +862,40 @@ class PPTGenerator:
                 if picture_ph:
                     try:
                         picture_ph.insert_picture(keyframe_path)
-                        logger.debug(f"Inserted image in placeholder idx=1: {keyframe_path}")
+                        logger.info(f"✅ Inserted image in placeholder idx=1: {Path(keyframe_path).name}")
                     except Exception as e:
-                        logger.warning(f"Could not insert image: {e}")
-            
-            # Fill content/caption - try idx=10 first (educational), then idx=2 (professional)
-            content_ph = self._get_placeholder_by_idx(slide, 10)
-            if content_ph:
-                content_ph.text_frame.clear()
-                self._add_bullet_points(content_ph, content)
-                logger.debug(f"Filled caption in placeholder idx=10")
-            else:
-                # Try idx=2 for professional template
-                content_ph = self._get_placeholder_by_idx(slide, 2)
-                if content_ph:
-                    content_ph.text_frame.clear()
-                    self._add_bullet_points(content_ph, content)
-                    logger.debug(f"Filled caption in placeholder idx=2 (professional template)")
+                        logger.warning(f"❌ Could not insert image: {e}")
                 else:
-                    logger.warning(f"Could not find caption placeholder (tried idx=10, 2)")
+                    logger.warning(f"❌ Could not find picture placeholder (idx=1)")
+            else:
+                logger.info(f"ℹ️  No keyframe to insert (path={keyframe_path})")
+            
+            # Fill content/caption - try multiple placeholder indices
+            # Different templates use different indices: 10 (educational), 2 (professional), 11 (some templates), 1 (fallback)
+            content_filled = False
+            
+            for ph_idx in [10, 2, 11]:  # Try in order of likelihood
+                content_ph = self._get_placeholder_by_idx(slide, ph_idx)
+                if content_ph and hasattr(content_ph, 'text_frame'):
+                    try:
+                        content_ph.text_frame.clear()
+                        self._add_bullet_points(content_ph, content)
+                        logger.info(f"✅ Filled caption in placeholder idx={ph_idx} ({len(content.split(chr(10)))} bullets)")
+                        content_filled = True
+                        break
+                    except Exception as e:
+                        logger.debug(f"Could not use placeholder idx={ph_idx}: {e}")
+            
+            if not content_filled:
+                logger.warning(f"⚠️  Could not find caption placeholder (tried idx=10, 2, 11)")
+                logger.warning(f"⚠️  Content NOT inserted: {content[:50]}...")
             
             logger.debug(f"Filled picture layout slide: {title}")
             
         except Exception as e:
             logger.error(f"Error filling picture layout: {e}")
             raise
+
     
     def _fill_three_content_placeholders(self, slide, slide_data: Dict):
         """

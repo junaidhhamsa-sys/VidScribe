@@ -1,0 +1,121 @@
+{
+  "status": "complete",
+  "video_path": "/Users/falahi/VidScrib/static/uploads/Generative AI vs AI agents vs Agentic AI_O2gerCxEXvc.mp4",
+  "output_format": "ppt",
+  "start_time": 1766528304.611627,
+  "video_info": {
+    "duration_seconds": 609.1333333333333,
+    "duration_formatted": "10:09",
+    "fps": 30.0,
+    "frame_count": 18274,
+    "resolution": "1280x718",
+    "width": 1280,
+    "height": 718,
+    "file_size_bytes": 21177044,
+    "file_size_mb": 20.196002960205078,
+    "format": ".mp4"
+  },
+  "keyframe_count": 2,
+  "transcript": " My goal today is to explain the difference between these three terms in a most simple language. When you ask a question to chat GPT, as a result, it will generate new text. It can also generate images, videos and so on. So generative AI is nothing but an AI that can create new content. Either text, image or video based on patterns learned from existing data. At the heart of it, there is large language model. And this model can be your GPT-4, Claude model, Jemina etc. It is trained on a huge volume of internet data. Okay, it can be Wikipedia text, Google books and so on. And based on that, it will be generating the answers. Now, if you ask this question, what is the price of a flight ticket tomorrow? It won't be able to answer because it has a knowledge cut off date. And this is a generative AI with only LLAM. But you might have noticed, if you ask some questions to chat GPT, you will see this searching the web attached and it will do the web search and it will return you the latest information from internet. So in this LLAM, if you give an access to Expedia API or let's say make my trip or any other travel API, then LLAM is smart enough to call this API and fetch the latest price of a flight. Okay, so this is getting little more intelligent than just simple LLAM which is trained on some knowledge cut off. So LLAM is like a brain. And to that brain, you are giving this access of a tool. Right, let's say you are a human. You have a brain, but I give you hammer and a screwdriver. You will be able to do even more. So similarly, for LLAM, these tools, then there is another thing called knowledge. These are like its hammers and screwdriver, which will help it do even more. You can also ask, book me a cheapest flight tomorrow from place A to B. And using Expedia API, it will first search different flights, then it will decide the cheapest one and then it will book that flight. So here, you are now performing actions. Previously, you are asking questions, simple Q&A, but now it is actually taking action for you. This is an AI agent. It is a program that takes input. It will think and it will act to complete a task. Okay, agent will complete task. It's not just simple Q&A chatbot. It will complete a task using tools, memory and knowledge. And there is some kind of autonomy or independent decision making. So when we looked at previously, see, it decided which is the cheapest flight. So maybe it found less say five flights and it figured out, okay, this is the cheapest flight and then it booked it. So it is taking independent decision. Okay, so it is autonomous, but at the same time, the example that we looked at is very narrow and specific. Okay, I'm asking, okay, from place A to B, book a flight tomorrow, cheapest flight. So it's a simple task. It's not that complex. It doesn't involve you know, multiple like step reasoning, multi-step planning and so on. But now let's say you ask even a more complex question such as, I want to travel to New Delhi in May. It is seven day trip, whether it should be sunny on all the days. Flight budget is less than $1,600. No labor. Now, this is the kind of question you will ask your travel agent, right? When you call it, okay, these are my five criteria. Give me the best flight. Well, apparently AI agents can do this. So it has access to Expedia for your travel needs. Now it needs to check weather also because you like sunny weather. So what you can do is provide an access to some weather API, you know, Acquewether API, whatever API. And then it will first check the weather, okay? So it will look at the month of May and find seven consecutive days where the weather is sunny. For those days, it will do a flight search, compare airlines, find the flight with a budget less than $1,600, okay? Not only that, it might go one step further and give you suggestions for hotel and airport taxi, okay? So see, I booked a flight and I also found you few good suggestions. So this is a flight booking AI agent. You see here, it's a flight booking AI agent which is doing a complex task than the simple AI agent. You can expand it further because when you travel across countries, you might need visa. So maybe it can do even more complex things such as it can call another AI agent which is Immigration AI agent. And this agent is also powered by Alalam, obviously, but it has access to let's say some immigration APIs. It has access to your one driver, you have kept your passport and your immigration records. And now this immigration agent, agent, right? This green box will check your visa eligibility. And it will say, hey, you know what, your visa has expired. So even before you book a ticket, you need to apply for a visa. So this is even a complex system where there is not just one agent. There are two agents, right? The first agent is flight booking. Second one is Immigration AI agent. So the system as a whole, if you think about the entire system, it is doing multi-step reasoning. It is not like, okay, go and book the flight ticket. It knows that you need to check visa. So it will call visa agent, check if the visa is there. And if visa is there, then it will do further steps. So it is doing multi-step reasoning, multi-step planning and working on a complex goal autonomously, okay? Now there is some control you need to give, you need to keep on this agents. You can't make them fully autonomous. You can give them your bank password. So there is some level of control that needs to be given. So agent TKI is a system where one or more AI agents work autonomously, often over long task, complex task, making decisions using tools and even other agents to reach a goal, okay? So as you can see, as you evolved from simple generative AI system with only ALLM, two AI agent, two agent TKI, you are capable of performing even more and more complex tasks. With only ALLM, you get just Q&A with the knowledge cut off. With AI agent, you can get access to tools and memory and you can perform narrow, simple task. With agent TKI, you can have multiple agents. It's not absolutely required that you need to have multiple agents by the way. Agent TKI can have single agent only. But other than agent, it has other components and it is able to handle multi-step goals with planning and coordination. Tool usage in GenIA is none AI agent will use tools and agent TKI also uses the tools. An autonomous decision making is highest when it comes to agent TKI. There are many tools available that you can use to build agent TKI system. One of the tools is N8N. So I am showing you the overflow diagram in N8N. And here, ALLM will be part of it, okay? So if you look at any agent TKI system, it will have generative AI as a core component of it, okay? So this entire system is AI agent and one of the components is your Gemini ALLM model, which is generative AI. So generative AI is part of or a component of agent TKI systems. There are many frameworks available to build agent TKI systems, agnocruion and so on. By the way, whatever definitions we have discussed, don't take them like two rigidly. You know, some people are like, no, AI agent means this. And agent TKI means this. My friend, who is a creator of Agnocruion, where defines these agent TKI system into five levels, okay? So first level is agent with tools and instructions, level two is agents with knowledge and so on. So different people define it differently. As long as you understand this core fundamental, which is agents are able to do some kind of autonomous action for narrow task. And when you move to agent TKI, your complexity increases. And usually there are more than one agents. So generative AI to AI agent to agent TKI, the complexity of the task that you can perform increases and it becomes more and more sophisticated. Now, folks, I have this Langgrave tutorial, where I have explained how to build AI agents using this popular framework. So just watch it out. I have given examples of how we do build a chatbot with tools and memory, human in the loop, etc. If you want to build fully agent TKI system, such as let's say you want to onboard an employee, which joining the organization, then in our AI bootcamp, we have this complete project where you just say, okay, onboard this new employee. And what it will do is it will add the employee to HRMS system. It will send welcome email to employees. It will notify the manager and so on. So here we use the cloud desktop as a front end and as a backend, we have built an MCP server. Okay, so that's part of our bootcamp's project. I hope this particular video gave you some understanding on these three different concepts. If you have any questions, post in a comment box below. If you like this video, give it a thumbs up and share it with your friends.",
+  "language": "en",
+  "captions": [],
+  "title": "Generative AI, Agents, Agentic AI",
+  "overview": "Understanding the evolution from basic generative models to sophisticated autonomous agent systems.",
+  "summary": "Understanding the evolution from basic generative models to sophisticated autonomous agent systems.",
+  "slides": [
+    {
+      "number": 1,
+      "title": "Explaining Key AI Concepts",
+      "content": "Goal is to simplify three important AI terms.\nDifferentiate between Generative AI, AI Agent, and Agentic AI.\nUnderstand the capabilities and complexities of each system.\nExplore practical examples for better comprehension.",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/Generative AI vs AI agents vs Agentic AI_O2gerCxEXvc_keyframes/keyframe_000_t1.00s.jpg"
+    },
+    {
+      "number": 2,
+      "title": "What is Generative AI?",
+      "content": "Creates new content based on learned data patterns.\nGenerates text, images, videos, and more.\nPowered by Large Language Models (LLMs) like GPT-4.\nTrained on vast volumes of internet data.\nProduces answers based on its training knowledge.",
+      "keyframe_path": null
+    },
+    {
+      "number": 3,
+      "title": "LLM Limitations",
+      "content": "Generative AI with only LLM has knowledge cut-off dates.\nCannot provide real-time information or current prices.\nLimited to the specific data it was trained on.\nRequires external data access for up-to-date responses.",
+      "keyframe_path": null
+    },
+    {
+      "number": 4,
+      "title": "Enhancing LLMs with Tools",
+      "content": "LLMs can access external tools like APIs for current data.\nChat GPT's \"searching the web\" feature is an example.\nIntegrate APIs (e.g., Expedia) to fetch live information.\nEnables LLMs to gather the latest flight prices.\nMakes the LLM more intelligent and capable.",
+      "keyframe_path": null
+    },
+    {
+      "number": 5,
+      "title": "LLM + Tools Analogy",
+      "content": "Think of the LLM as the brain of the system.\nTools are like hammers and screwdrivers for humans.\nProviding tools extends the brain's capabilities.\nAllows the system to perform additional actions.\nEnhances problem-solving beyond basic knowledge.",
+      "keyframe_path": null
+    },
+    {
+      "number": 6,
+      "title": "What is an AI Agent?",
+      "content": "A program designed to complete specific tasks autonomously.\nTakes input, thinks, and acts to achieve a goal.\nGoes beyond simple Q&A chatbots.\nUtilizes tools, memory, and knowledge effectively.\nExhibits independent decision-making for narrow tasks.",
+      "keyframe_path": null
+    },
+    {
+      "number": 7,
+      "title": "AI Agent Capabilities",
+      "content": "Accesses external APIs for dynamic data and actions.\nCan search, compare, and make decisions independently.\nFor example, finding the cheapest flight among options.\nPerforms actions, not just answering questions.\nOften focused on a narrow and specific range of tasks.",
+      "keyframe_path": null
+    },
+    {
+      "number": 8,
+      "title": "Simple AI Agent Example",
+      "content": "Booking the cheapest flight from A to B tomorrow.\nAgent uses Expedia API to search various flights.\nIdentifies the lowest-priced option automatically.\nProceeds to book the selected flight for the user.\nDemonstrates task completion and autonomous action.",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/Generative AI vs AI agents vs Agentic AI_O2gerCxEXvc_keyframes/keyframe_001_t8.67s.jpg"
+    },
+    {
+      "number": 9,
+      "title": "Complex AI Agent Tasks",
+      "content": "Handling multi-criteria travel planning requests.\n\"Travel to New Delhi in May for 7 sunny days, budget < $1600.\"\nIntegrates weather APIs to find suitable dates.\nSearches flights, compares airlines, and adheres to budget.\nCan suggest additional services like hotels or taxis.",
+      "keyframe_path": null
+    },
+    {
+      "number": 10,
+      "title": "Multi-Agent Systems",
+      "content": "Some complex tasks require multiple specialized AI agents.\nA flight booking agent could interact with an immigration agent.\nImmigration agent checks visa eligibility before booking.\nAccesses immigration APIs and passport records.\nEnsures visa is valid, preventing potential travel issues.",
+      "keyframe_path": null
+    },
+    {
+      "number": 11,
+      "title": "What is Agentic AI?",
+      "content": "A sophisticated system with one or more AI agents.\nWorks autonomously on complex, often long-duration tasks.\nMakes multi-step decisions using tools and other agents.\nEngages in multi-step reasoning and planning.\nAims to achieve a complex goal with high autonomy.",
+      "keyframe_path": null
+    },
+    {
+      "number": 12,
+      "title": "Evolving AI Capabilities [COMPARISON]",
+      "content": "**Generative AI:** Simple Q&A, knowledge cut-off, no tools.\n**AI Agent:** Tools & memory, narrow tasks, some autonomy.\n**Agentic AI:** Multiple agents, complex goals, high autonomy.\n**Task Complexity:** Q&A -> Simple Task -> Multi-step Planning.\n**Tool Usage:** None -> Yes (single agent) -> Yes (multiple tools/agents).\n**Autonomy Level:** Lowest -> Moderate -> Highest for complex goals.",
+      "keyframe_path": null
+    },
+    {
+      "number": 13,
+      "title": "Building Agentic AI Systems",
+      "content": "Various tools and frameworks are available for development.\nN8N is an example shown for visual workflow diagrams.\nGenerative AI (LLM) is a core component within.\nFrameworks like Agnocruion aid in system creation.\nDefinitions can vary, but core principles remain.",
+      "keyframe_path": null
+    },
+    {
+      "number": 14,
+      "title": "Agentic AI in Practice",
+      "content": "Example: Employee onboarding system for organizations.\nAgentic AI automates adding employees to HRMS.\nSends welcome emails and notifies managers automatically.\nUses a frontend (e.g., Cloud Desktop) and backend server.\nHandles complex, multi-step organizational workflows.",
+      "keyframe_path": null
+    },
+    {
+      "number": 15,
+      "title": "Key Takeaways",
+      "content": "Generative AI creates content, but with knowledge limits.\nAI Agents add tools for narrow task completion.\nAgentic AI orchestrates agents for complex, autonomous goals.\nComplexity and sophistication increase across these stages.\nThese concepts drive advanced AI applications and automation.",
+      "keyframe_path": null
+    }
+  ],
+  "output_path": "/Users/falahi/VidScrib/outputs/Generative AI vs AI agents vs Agentic AI_O2gerCxEXvc.pptx",
+  "output_type": "ppt",
+  "template": "acedamic",
+  "processing_time": 51.9432430267334
+}

@@ -92,13 +92,15 @@ class PDFGenerator:
             # Add image if available
             if config.PDF_INCLUDE_IMAGES and 'keyframe_path' in slide:
                 image_path = slide['keyframe_path']
-                if Path(image_path).exists():
+                if image_path and Path(image_path).exists():  # ✅ FIXED - check not None first
                     try:
                         img = Image(image_path, width=4*inch, height=3*inch)
                         story.append(img)
-                        story.append(Spacer(1, 0.2 * inch))
+                        story.append(Spacer(1, 0.2 * inch))    
                     except Exception as e:
                         logger.error(f"Error adding image to PDF: {e}")
+                else:
+                    logger.debug(f"Slide '{slide.get('title', 'Unknown')}': No keyframe image")
             
             # Section content
             content = slide.get('content', '')

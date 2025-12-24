@@ -263,16 +263,54 @@ async function handleFormSubmit(event) {
     event.preventDefault();
 
     const formData = new FormData(uploadForm);
-    const file = videoFileInput.files[0];
 
-    if (!file) {
-        showError('Please select a video file');
-        return;
+    // Check if YouTube mode is active
+    const youtubeRadio = document.getElementById('youtubeToggle');
+    const uploadRadio = document.getElementById('uploadToggle');
+    const isYouTubeMode = youtubeRadio && youtubeRadio.checked;
+
+    if (isYouTubeMode) {
+        // YouTube URL mode
+        const youtubeUrlInput = document.getElementById('youtubeUrl');
+        const url = youtubeUrlInput.value.trim();
+
+        if (!url) {
+            showError('Please enter a YouTube URL');
+            return;
+        }
+
+        // Basic YouTube URL validation
+        if (!url.includes('youtube.com') && !url.includes('youtu.be')) {
+            showError('Please enter a valid YouTube URL');
+            return;
+        }
+
+        console.log('Submitting YouTube URL:', url);
+
+        // Note: youtube_url is already in formData from the input field
+        // Remove video file if present (it shouldn't be, but just in case)
+        formData.delete('video');
+
+    } else {
+        // File upload mode
+        const file = videoFileInput.files[0];
+
+        if (!file) {
+            showError('Please select a video file');
+            return;
+        }
+
+        console.log('Submitting video file:', file.name);
+
+        // Remove YouTube URL if present
+        formData.delete('youtube_url');
     }
 
     // Disable submit button
     uploadBtn.disabled = true;
-    uploadBtn.innerHTML = '<span>⏳ Uploading...</span>';
+    uploadBtn.innerHTML = isYouTubeMode
+        ? '<span> Downloading & Processing...</span>'
+        : '<span> Uploading...</span>';
 
     try {
         const response = await fetch('/upload', {
@@ -299,7 +337,16 @@ async function handleFormSubmit(event) {
         showError('Network error. Please try again.');
     } finally {
         uploadBtn.disabled = false;
-        uploadBtn.innerHTML = '<span>🚀 Start Processing</span>';
+        uploadBtn.innerHTML = `
+            Start Processing
+            <div class=\"icon\">
+              <svg height=\"24\" width=\"24\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\">
+                <path d=\"M0 0h24v24H0z\" fill=\"none\"></path>
+                <path d=\"M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z\"
+                  fill=\"currentColor\"></path>
+              </svg>
+            </div>
+        `;
     }
 }
 
@@ -527,8 +574,35 @@ function resetApp() {
 
     // Reset form
     uploadForm.reset();
-    fileNameDisplay.textContent = 'Choose video file...';
-    fileLabel.classList.remove('has-file');
+
+    // Reset file display elements if they exist
+    if (fileNameDisplay) {
+        fileNameDisplay.textContent = 'Choose video file...';
+    }
+    if (fileLabel) {
+        fileLabel.classList.remove('has-file');
+    }
+
+    // Reset uploaded file UI
+    const uploadText = document.getElementById('uploadText');
+    const selectedFileName = document.getElementById('selectedFileName');
+    const fileButtonText = document.getElementById('fileButtonText');
+    const folderContainer = document.querySelector('.folder-container');
+
+    if (uploadText) {
+        uploadText.textContent = 'Drag and drop your video here, or click to browse';
+        uploadText.style.color = ''; // Reset color
+    }
+    if (selectedFileName) {
+        selectedFileName.textContent = '';
+        selectedFileName.style.display = 'none';
+    }
+    if (fileButtonText) {
+        fileButtonText.textContent = 'Choose a file';
+    }
+    if (folderContainer) {
+        folderContainer.classList.remove('file-uploaded');
+    }
 
     // Reset template selection visibility (show by default for PPT)
     if (templateSection) {
@@ -568,7 +642,7 @@ function formatTime(seconds) {
 // Console Welcome Message
 // ============================================================================
 
-console.log('%c🎬 VidScribe', 'font-size: 24px; font-weight: bold; color: #2563eb;');
+console.log('%cVidScribe', 'font-size: 24px; font-weight: bold; color: #2563eb;');
 console.log('%cAI-Powered Video Summarization', 'font-size: 14px; color: #64748b;');
 console.log('%cPowered by OpenCV, Whisper & Gemini AI', 'font-size: 12px; color: #94a3b8;');
 // ============================================================================
@@ -601,7 +675,7 @@ function loadResultsData() {
         resultsOutputName = outputName;
         selectedResultTemplate = template;
 
-        console.log('✅ Loaded results data:', {
+        console.log('Loaded results data:', {
             slides: totalSlides,
             outputName: resultsOutputName,
             template: selectedResultTemplate
@@ -630,6 +704,19 @@ function initResultsViewing() {
     const downloadResultBtn = document.getElementById('downloadResultBtn');
     const processAnotherBtn = document.getElementById('processAnotherBtn');
 
+    // Populate video summary stats
+    const slidesCountEl = document.getElementById('slidesCount');
+    const currentTemplateEl = document.getElementById('currentTemplate');
+
+    if (slidesCountEl) {
+        slidesCountEl.textContent = totalSlides || slidesData.length || '0';
+    }
+
+    if (currentTemplateEl) {
+        const templateName = selectedResultTemplate || 'Professional';
+        currentTemplateEl.textContent = templateName.charAt(0).toUpperCase() + templateName.slice(1);
+    }
+
     if (regenerateBtn) {
         regenerateBtn.addEventListener('click', handleRegenerateTemplate);
     }
@@ -646,7 +733,7 @@ function initResultsViewing() {
         processAnotherBtn.addEventListener('click', resetToUpload);
     }
 
-    console.log('✅ Results buttons initialized');
+    console.log('Results buttons initialized');
 }
 
 async function handleRegenerateTemplate() {
@@ -656,7 +743,7 @@ async function handleRegenerateTemplate() {
     const successDiv = document.getElementById('regenerateSuccess');
     const selectedTemplate = templateDropdown.value;
 
-    console.log(`🔄 Regenerating PPT with template: ${selectedTemplate}`);
+    console.log(`Regenerating PPT with template: ${selectedTemplate}`);
 
     regenerateBtn.disabled = true;
     statusDiv.classList.remove('hidden');
@@ -672,7 +759,7 @@ async function handleRegenerateTemplate() {
         const result = await response.json();
 
         if (response.ok && result.status === 'success') {
-            console.log('✅ PPT regenerated successfully!');
+            console.log('PPT regenerated successfully!');
 
             statusDiv.classList.add('hidden');
             successDiv.classList.remove('hidden');
@@ -689,7 +776,7 @@ async function handleRegenerateTemplate() {
             throw new Error(result.error || 'Regeneration failed');
         }
     } catch (error) {
-        console.error('❌ Regeneration error:', error);
+        console.error('Regeneration error:', error);
         statusDiv.classList.add('hidden');
         regenerateBtn.disabled = false;
         alert(`Failed to regenerate PPT: ${error.message}`);

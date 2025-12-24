@@ -161,10 +161,13 @@ class VideoPipeline:
             # Calculate which slides should get keyframes (evenly spaced)
             keyframe_indices = []
             if num_keyframes > 0 and num_sections > 0:
-                # Distribute keyframes evenly: e.g., 8 slides, 5 keyframes → [0, 2, 4, 6, 7]
-                step = num_sections / num_keyframes
-                keyframe_indices = [int(i * step) for i in range(num_keyframes)]
-                logger.info(f"📸 Distributing {num_keyframes} keyframes evenly: slides {keyframe_indices}")
+                # 🎯 LIMIT keyframes to 30-40% of slides for layout variety
+                max_keyframes_to_use = max(1, int(num_sections * 0.35))
+                keyframes_to_use = min(num_keyframes, max_keyframes_to_use)
+                # Distribute keyframes evenly: e.g., 15 slides, 5 keyframes → [0, 3, 7, 11, 14]
+                step = num_sections / keyframes_to_use
+                keyframe_indices = [int(i * step) for i in range(keyframes_to_use)]
+                logger.info(f"📸 Using {keyframes_to_use}/{num_keyframes} keyframes on slides {keyframe_indices}")
             
             for i, section in enumerate(summary_data['sections']):
                 # Assign keyframe if this slide index is in the distribution
