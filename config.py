@@ -33,7 +33,7 @@ MAX_VIDEO_DURATION = 45 * 60  # 45 minutes in seconds
 MOTION_THRESHOLD = 30  # Motion detection sensitivity (lower = more sensitive)
 HISTOGRAM_THRESHOLD = 0.7  # Scene change detection (lower = more sensitive)
 MIN_FRAME_INTERVAL = 30  # Minimum frames between keyframes (1 sec at 30fps)
-MAX_KEYFRAMES = 20  # Maximum number of keyframes to extract
+MAX_KEYFRAMES = 10  # Maximum number of keyframes to extract
 
 # Tesseract OCR Settings (for text extraction from keyframes)
 TESSERACT_CMD = "/opt/homebrew/bin/tesseract"  # Path to Tesseract executable
@@ -50,10 +50,27 @@ WHISPER_MODEL = "base"  # Options: tiny, base, small, medium, large
 # "base" is good balance of speed and accuracy for 45-min videos
 WHISPER_LANGUAGE = "en"  # None = auto-detect language
 
+# Groq Whisper API (Cloud-based transcription - much faster!)
+USE_GROQ_WHISPER = True  # True = use Groq API (fast), False = local Whisper (slow)
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")  # Set via .env file
+
 # ============================================================================
 # GEMINI API SETTINGS
 # ============================================================================
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")  # Set via .env file
+
+# Load all API keys for rotation (primary + numbered keys)
+GEMINI_API_KEYS = [
+    os.getenv("GEMINI_API_KEY", ""),
+    os.getenv("GEMINI_API_KEY_1", ""),
+    os.getenv("GEMINI_API_KEY_2", ""),
+    os.getenv("GEMINI_API_KEY_3", ""),
+    os.getenv("GEMINI_API_KEY_4", ""),
+    os.getenv("GEMINI_API_KEY_5", ""),
+]
+# Filter out empty keys
+GEMINI_API_KEYS = [key for key in GEMINI_API_KEYS if key]
+
 GEMINI_MODEL = "gemini-2.5-flash"  # Free tier model with video support  gemma-3-27b,gemini-2.5-flash-live
 GEMINI_TEMPERATURE = 0.7  # Creativity level (0.0 = focused, 1.0 = creative)
 GEMINI_MAX_TOKENS = 2048  # Maximum tokens for summary generation

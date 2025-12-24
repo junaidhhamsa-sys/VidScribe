@@ -1,49 +1,37 @@
-"""Audio extraction and transcription using MoviePy and Whisper"""
+"""Audio extraction and transcription using MoviePy and Groq Whisper"""
 
-import whisper
+import os
+import logging
+from pathlib import Path
+from pydub import AudioSegment
+
 try:
-    # Try moviepy 2.x import
     from moviepy import VideoFileClip
 except ImportError:
-    # Fall back to moviepy 1.x import
     from moviepy.editor import VideoFileClip
-from pathlib import Path
-import logging
 
 logger = logging.getLogger(__name__)
 
 
 class AudioProcessor:
-    """Extract audio from video and transcribe using Whisper"""
+    """Extract audio from video in optimal format for transcription"""
     
-    def __init__(self, model_name="base", language=None):
+    def __init__(self, output_format="ogg", bitrate="32k", channels=1):
         """
         Initialize AudioProcessor
         
         Args:
-            model_name: Whisper model size (tiny, base, small, medium, large)
-            language: Language code (None for auto-detect)
+            output_format: Audio format (ogg, mp3, m4a) - ogg is smallest
+            bitrate: Audio bitrate (32k for speech is optimal)
+            channels: Number of audio channels (1=mono for speech)
         """
-        self.model_name = model_name
-        self.language = language
-        self.model = None
+        self.output_format = output_format
+        self.bitrate = bitrate
+        self.channels = channels
         
-    def load_model(self):
-        """Load Whisper model (lazy loading)"""
-        if self.model is None:
-            logger.info("="*60)
-            logger.info(f"🎤 WHISPER MODEL LOADING")
-            logger.info(f"   Model Size: {self.model_name}")
-            logger.info(f"   Language: {self.language or 'Auto-detect'}")
-            logger.info(f"   Purpose: Audio transcription")
-            logger.info("="*60)
-            self.model = whisper.load_model(self.model_name)
-            logger.info("✅ Whisper model loaded successfully")
-            logger.info("="*60)
-            
     def extract_audio(self, video_path: str, audio_path: str = None) -> str:
         """
-        Extract audio from video file
+        Extract audio from video file in compressed format
         
         Args:
             video_path: Path to input video
@@ -52,73 +40,68 @@ class AudioProcessor:
         Returns:
             Path to extracted audio file
         """
-        logger.info(f"Extracting audio from {video_path}")
+        logger.info("="*60)
+        logger.info("🎵 AUDIO EXTRACTION")
+        logger.info(f"   Video: {Path(video_path).name}")
+        logger.info(f"   Format: {self.output_format.upper()}")
+        logger.info(f"   Bitrate: {self.bitrate}")
+        logger.info(f"   Channels: {self.channels} (mono)")
+        logger.info("="*60)
         
         if audio_path is None:
             video_name = Path(video_path).stem
-            audio_path = str(Path(video_path).parent / f"{video_name}_audio.wav")
+            audio_path = str(Path(video_path).parent / f"{video_name}_audio.{self.output_format}")
             
         try:
+            # Extract audio using MoviePy first
+            temp_audio = str(Path(audio_path).parent / f"temp_audio.wav")
+            
             video = VideoFileClip(video_path)
-            # MoviePy 2.x doesn't support verbose and logger parameters
-            video.audio.write_audiofile(audio_path)
+            # MoviePy 2.x compatibility - no verbose/logger parameters
+            video.audio.write_audiofile(temp_audio)
             video.close()
-            logger.info(f"Audio extracted to {audio_path}")
+            
+            # Convert to compressed format using pydub
+            logger.info(f"Converting to {self.output_format.upper()} format...")
+            audio = AudioSegment.from_wav(temp_audio)
+            
+            # Export with compression
+            export_params = {
+                "format": self.output_format,
+                "bitrate": self.bitrate,
+                "parameters": ["-ac", str(self.channels)]
+            }
+            
+            if self.output_format == "ogg":
+                export_params["codec"] = "libopus"
+            
+            audio.export(audio_path, **export_params)
+            
+            # Clean up temp file
+            if os.path.exists(temp_audio):
+                os.remove(temp_audio)
+            
+            # Get file size
+            file_size = os.path.getsize(audio_path) / (1024 * 1024)
+            logger.info(f"✅ Audio extracted: {file_size:.2f}MB")
+            logger.info(f"   Saved to: {audio_path}")
+            logger.info("="*60)
+            
             return audio_path
+            
         except Exception as e:
             logger.error(f"Error extracting audio: {e}")
             raise
             
-    def transcribe_audio(self, audio_path: str) -> dict:
+    def get_audio_duration(self, audio_path: str) -> float:
         """
-        Transcribe audio using Whisper
+        Get audio duration in seconds
         
         Args:
             audio_path: Path to audio file
             
         Returns:
-            Dictionary with transcription results
+            Duration in seconds
         """
-        logger.info(f"Transcribing audio from {audio_path}")
-        
-        self.load_model()
-        
-        try:
-            result = self.model.transcribe(
-                audio_path,
-                language=self.language,
-                verbose=False
-            )
-            
-            logger.info(f"Transcription complete. Detected language: {result.get('language', 'unknown')}")
-            logger.info(f"Transcript length: {len(result['text'])} characters")
-            
-            return {
-                'text': result['text'],
-                'language': result.get('language'),
-                'segments': result.get('segments', [])
-            }
-        except Exception as e:
-            logger.error(f"Error transcribing audio: {e}")
-            raise
-            
-    def process_video(self, video_path: str, temp_audio_path: str = None) -> dict:
-        """
-        Complete pipeline: extract audio and transcribe
-        
-        Args:
-            video_path: Path to input video
-            temp_audio_path: Path for temporary audio file
-            
-        Returns:
-            Transcription results
-        """
-        logger.info(f"Processing video: {video_path}")
-        
-        # Extract audio
-        audio_path = self.extract_audio(video_path, temp_audio_path)
-        
-        # Transcribe
-        result = self.transcribe_audio(audio_path)
-        
-        return result
+        audio = AudioSegment.from_file(audio_path)
+        return len(audio) / 1000.0

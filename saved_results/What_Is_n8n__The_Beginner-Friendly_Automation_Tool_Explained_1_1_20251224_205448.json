@@ -1,0 +1,182 @@
+{
+  "status": "complete",
+  "video_path": "/Users/falahi/VidScrib/static/uploads/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448.mp4",
+  "output_format": "ppt",
+  "start_time": 1766589888.913051,
+  "video_info": {
+    "duration_seconds": 212.67934601267936,
+    "duration_formatted": "3:32",
+    "fps": 29.97,
+    "frame_count": 6374,
+    "resolution": "1280x720",
+    "width": 1280,
+    "height": 720,
+    "file_size_bytes": 8751769,
+    "file_size_mb": 8.34633731842041,
+    "format": ".mp4"
+  },
+  "keyframe_count": 15,
+  "transcript": " Welcome to the N8N Introduction Course. In this first lesson, we'll cover what N8N is and why it's becoming the go-to choice for workflow automation. How much time do you spend on repetitive tasks? Copying data between apps, sending the same notifications, updating multiple systems with the same information. These manual tasks eat up hours every week. But what if we could automate them? That's where N8N comes in. N8N, pronounced N-A-N, is a workflow automation tool that connects your apps and services together. Think of it as a digital assembly line. You design the workflow once and N8N executes it automatically whether that's every minute, every day, or whenever a specific event happens. What makes N8N special is its visual approach. Instead of writing complex code, You build workflows by dragging and dropping nodes, each representing an action or service. You want to save an email attachment to the Google Drive and notify your team on Slack? Just connect the nodes and you're done. Okay, so you're probably wondering how is N8N different from tools like Zapier or Make? First of all, the Fair Code model. Unlike closed source alternatives, you can see exactly how NNN works and even modify it for your needs. Second, self-hosting. Your data stays on your server, complete control, complete privacy. Third no execution limits when self Run workflows as often as you need without worrying about quotas And fourth developer friendly You can write custom JavaScript when you need to but you don have to Being open source isn't just about free software. It also means a vibrant community, creating new integrations, transparent development. You can see what's coming next. No vendor lock-in, your workflows are yours, and the ability to contribute and shape the tool's future. Now let's think about what you can actually build with Interdent, right? So let's say you have an e-commerce store. You can have a system, an automation that automatically processes orders, updates inventory, and sends the shipping notifications. If you're an HR team streamlining onboarding, you can create accounts, you can send the welcome emails, you can schedule the meetings, stuff like that. Anything that an HR team would have to do manually, you can automate. How about if you need to modify data, right? Like you're some part of a data team, you can extract data from APIs, you can pull that in, you can transform it, and you can load it into a database or some other warehouse. N8N is for anyone who wants to automate work. Business users tired of manual data entry, developers who wanna build integrations fast, IT teams needing to connect enterprise systems, entrepreneurs scaling their operations. You don't need to be a programmer. If you can draw a flow chart, you can build with N8N. It's that easy. Now that you understand what N8N is and why it's powerful, you're ready to get hands on. In the next lesson, we'll walk through installing N8N and setting up your first workspace. Get ready to say goodbye to repetitive tasks and hello to automation.",
+  "language": "English",
+  "captions": [
+    {
+      "image_path": "/Users/falahi/VidScrib/temp/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448/keyframes/keyframe_000_t19.65s.jpg",
+      "caption": "A man in a suit is intently working at a computer in a cluttered office setting, surrounded by binders and a coffee cup. His monitor is notably covered in numerous pink sticky notes, suggesting a busy or complex task. The overlaying text \"Copying data between apps\" (with \"apps\" highlighted) indicates the specific digital activity he is engaged in."
+    },
+    {
+      "image_path": "/Users/falahi/VidScrib/temp/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448/keyframes/keyframe_001_t24.99s.jpg",
+      "caption": "The image shows a middle-aged man with grey hair and a black t-shirt speaking directly to the camera, gesturing with his hands. He is situated in what appears to be a home office or gaming room, with blue LED strip lighting along a wall, a bookshelf with decorative items on the left, and a computer setup on the right. At the bottom of the frame, subtitles display the text \"These manual tasks,\" with \"manual\" highlighted in blue."
+    },
+    {
+      "image_path": "/Users/falahi/VidScrib/temp/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448/keyframes/keyframe_002_t40.97s.jpg",
+      "caption": "This image depicts a modern, automated manufacturing or assembly line in operation. Multiple bright orange robotic arms are actively transporting flat components between several compact 3D printers, which glow with a subtle blue light, indicating they are actively working. The scene illustrates an efficient, streamlined production process, possibly for rapid prototyping or component assembly."
+    },
+    {
+      "image_path": "/Users/falahi/VidScrib/temp/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448/keyframes/keyframe_003_t43.64s.jpg",
+      "caption": "This image illustrates a modern, automated factory floor, showcasing an assembly line of industrial machinery. Bright yellow robotic arms are strategically placed alongside multiple gray and white 3D printers or manufacturing units, some exhibiting glowing blue internal lights, suggesting active operation. The scene emphasizes efficiency and automation, underscored by the overlaid text, \"You design the workflow once, and NBN.\""
+    },
+    {
+      "image_path": "/Users/falahi/VidScrib/temp/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448/keyframes/keyframe_004_t59.66s.jpg",
+      "caption": "This image displays a visual programming interface, likely for building an AI agent or chatbot, set against a dark grey grid background. It shows a workflow with a trigger \"When chat message received\" connected to an \"AI Agent\" node, which is outlined in red with a warning triangle, indicating it requires further configuration for its \"Chat Model,\" \"Memory,\" and \"Tool\" inputs. The \"Editor\" tab is selected, highlighting the current task of setting up this AI system."
+    },
+    {
+      "image_path": "/Users/falahi/VidScrib/temp/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448/keyframes/keyframe_005_t86.32s.jpg",
+      "caption": "This image highlights the concept of \"Open Source\" as its main subject, prominently displayed on a torn paper strip against a deep blue background. Above it, the text \"Free to use\" appears on another torn strip, emphasizing a key characteristic. Below, the phrase \"closed source alternatives\" with \"alternatives\" in a vibrant light blue, establishes a comparative context, likely promoting open-source solutions."
+    },
+    {
+      "image_path": "/Users/falahi/VidScrib/temp/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448/keyframes/keyframe_006_t88.99s.jpg",
+      "caption": "The image displays a collection of torn white paper strips with bold black text, set against a deep blue background, emphasizing the concept of \"Open Source.\" Key terms such as \"Free to use,\" \"No Cost,\" \"Collaborative,\" and \"Public\" are also visible, describing characteristics of open-source projects. A partial subtitle at the bottom, \"you can see exactly how N8N works and,\" suggests the image is part of a presentation or explanation about a specific open-source tool."
+    },
+    {
+      "image_path": "/Users/falahi/VidScrib/temp/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448/keyframes/keyframe_007_t94.33s.jpg",
+      "caption": "This image depicts an abstract digital network on a dark background, illustrating the concept of interconnected devices and data flow. Glowing blue lines and dotted grids form a complex system, populated by various icons such as cars, homes, mobile phones, computers, and user profiles, suggesting the Internet of Things. The prominent text \"Your data stays on\" at the bottom emphasizes continuous data connectivity and availability within this digital ecosystem."
+    },
+    {
+      "image_path": "/Users/falahi/VidScrib/temp/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448/keyframes/keyframe_008_t97.00s.jpg",
+      "caption": "A luminous, blue-green digital shield, composed of various small icons representing homes, people, and devices, dominates a dark, abstract background with faint grid lines and light streaks. This imagery effectively symbolizes comprehensive cybersecurity or network protection for interconnected digital systems and aspects of modern life."
+    },
+    {
+      "image_path": "/Users/falahi/VidScrib/temp/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448/keyframes/keyframe_009_t118.32s.jpg",
+      "caption": "A diverse group of six individuals, varying in age and gender, is seen walking together and smiling on a street lined with old buildings. They are dressed in casual, warm clothing, and some wear lanyards with badges, indicating they might be attending a community event or conference. Partially visible text at the bottom reads, \"community creating new integrations,\" providing context for their gathering."
+    },
+    {
+      "image_path": "/Users/falahi/VidScrib/temp/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448/keyframes/keyframe_010_t120.99s.jpg",
+      "caption": "A diverse group of six individuals, spanning multiple generations, are seen walking arm-in-arm through an urban street lined with multi-story buildings. They are casually dressed in layered clothing, some displaying white ID tags, and appear to be enjoying their outing. Overlaid text at the bottom of the image reads \"can see what's coming next.\""
+    },
+    {
+      "image_path": "/Users/falahi/VidScrib/temp/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448/keyframes/keyframe_011_t139.67s.jpg",
+      "caption": "A man with glasses and a beard, dressed in a denim shirt, is focused on a laptop at a white desk. He is holding a white bottle with a straw and another object, possibly a pen, in his hands. The background is filled with stacks of cardboard boxes, suggesting a busy workspace, warehouse, or e-commerce setting, while a text overlay at the bottom reads, \"You can have a system, an automation that\"."
+    },
+    {
+      "image_path": "/Users/falahi/VidScrib/temp/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448/keyframes/keyframe_012_t150.32s.jpg",
+      "caption": "The image displays a close-up of a person's hands reviewing several documents, likely resumes or candidate profiles, spread across a dark table. Each document features a small photograph of an individual, indicating a process related to recruitment or personnel evaluation. The prominent bright blue text \"onboarding\" on the screen explicitly contextualizes the scene as related to integrating new employees into an organization."
+    },
+    {
+      "image_path": "/Users/falahi/VidScrib/temp/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448/keyframes/keyframe_013_t152.99s.jpg",
+      "caption": "In this close-up shot, a person's hands are seen holding and reviewing multiple paper documents, one of which displays a small photo. In the blurred background, a laptop screen shows various business charts and graphs, suggesting an office or professional setting. The prominent text overlay, \"you can send the welcome emails,\" indicates the activity is likely related to administrative tasks such as onboarding new employees or managing client communications."
+    },
+    {
+      "image_path": "/Users/falahi/VidScrib/temp/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448/keyframes/keyframe_014_t163.66s.jpg",
+      "caption": "A formally dressed man, wearing glasses and holding a tablet, stands in a high-tech environment surrounded by large digital screens displaying glowing green and blue data visualizations. His face reflects the light from the screens, highlighting an immersive digital experience. The overlaid text, \"Like you're some part of a data team,\" clearly positions him within a professional data analysis or management role."
+    }
+  ],
+  "title": "N8N: Workflow Automation Course",
+  "overview": "This presentation introduces N8N as a powerful, visual workflow automation tool for connecting applications and eliminating repetitive tasks.",
+  "summary": "This presentation introduces N8N as a powerful, visual workflow automation tool for connecting applications and eliminating repetitive tasks.",
+  "slides": [
+    {
+      "number": 1,
+      "title": "Introduction to N8N",
+      "content": "Welcome to the N8N Introduction Course\nExplore powerful workflow automation capabilities\nAddress time lost to repetitive manual tasks\nDiscover how N8N tackles these challenges\nSay goodbye to manual, tedious work",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448_keyframes/keyframe_000_t19.65s.jpg"
+    },
+    {
+      "number": 2,
+      "title": "What is N8N?",
+      "content": "N8N is a versatile workflow automation tool\nConnects various applications and services seamlessly\nFunctions as a digital assembly line for tasks\nExecutes designed workflows automatically on schedule\nReacts to specific events for dynamic automation",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448_keyframes/keyframe_001_t24.99s.jpg"
+    },
+    {
+      "number": 3,
+      "title": "Visual Workflow Design",
+      "content": "Employs a unique visual approach to automation\nBuild workflows using intuitive drag-and-drop nodes\nEach node represents a specific action or service\nEliminates the need for complex coding knowledge\nEasily link actions to create powerful automations",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448_keyframes/keyframe_002_t40.97s.jpg"
+    },
+    {
+      "number": 4,
+      "title": "N8N vs. Alternatives [COMPARISON]",
+      "content": "Fair-Code Model: Open source for full transparency\nSelf-Hosting: Retain complete control over your data\nNo Execution Limits: Run workflows without quotas\nDeveloper Friendly: Custom JavaScript for advanced needs\nCommunity Driven: Vibrant ecosystem and shared integrations\nVendor Lock-in Free: Your workflows remain fully yours",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448_keyframes/keyframe_003_t43.64s.jpg"
+    },
+    {
+      "number": 5,
+      "title": "Advantages of Open Source",
+      "content": "Beyond free software, fostering innovation and collaboration\nAccess a vibrant community creating new integrations\nBenefit from transparent development processes\nContribute to shaping the tool's future direction\nEnsures long-term flexibility and adaptability",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448_keyframes/keyframe_004_t59.66s.jpg"
+    },
+    {
+      "number": 6,
+      "title": "E-commerce Automation",
+      "content": "Automate key operations for online stores efficiently\nProcess new customer orders automatically\nUpdate inventory levels in real-time\nSend shipping notifications to customers promptly\nStreamline entire order fulfillment pipelines",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448_keyframes/keyframe_005_t86.32s.jpg"
+    },
+    {
+      "number": 7,
+      "title": "Streamlining HR Onboarding",
+      "content": "Simplify and automate human resources processes\nAutomatically create new employee accounts\nSend personalized welcome emails to new hires\nSchedule essential introductory meetings effortlessly\nManage HR tasks with increased efficiency",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448_keyframes/keyframe_006_t88.99s.jpg"
+    },
+    {
+      "number": 8,
+      "title": "Data Processing & Integration",
+      "content": "Powerful capabilities for data teams and analysts\nExtract valuable data from various APIs\nTransform raw data into usable formats\nLoad processed information into databases\nIntegrate diverse data sources effectively",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448_keyframes/keyframe_007_t94.33s.jpg"
+    },
+    {
+      "number": 9,
+      "title": "Who Can Use N8N?",
+      "content": "Designed for anyone seeking to automate work\nBusiness users tired of manual data entry tasks\nDevelopers building integrations quickly and efficiently\nIT teams connecting complex enterprise systems\nEntrepreneurs scaling their business operations effectively",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448_keyframes/keyframe_008_t97.00s.jpg"
+    },
+    {
+      "number": 10,
+      "title": "No Programming Skills Needed",
+      "content": "You don't need to be a seasoned programmer\nBuild workflows if you can draw a flow chart\nIntuitive visual interface simplifies complex logic\nEmpowers non-technical users to automate tasks\nMakes automation accessible to a broader audience",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448_keyframes/keyframe_009_t118.32s.jpg"
+    },
+    {
+      "number": 11,
+      "title": "Core Principles of N8N",
+      "content": "Focus on empowering users with automation\nEnsures flexibility through open-source foundation\nPrioritizes data privacy and user control\nDesigned for scalability and diverse use cases\nOffers a robust and adaptable automation solution",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448_keyframes/keyframe_010_t120.99s.jpg"
+    },
+    {
+      "number": 12,
+      "title": "Unleashing Automation Potential",
+      "content": "Transform time-consuming manual processes\nUnlock new levels of productivity and efficiency\nFree up valuable time for strategic initiatives\nReduce errors associated with repetitive tasks\nAchieve more with less effort using automation",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448_keyframes/keyframe_011_t139.67s.jpg"
+    },
+    {
+      "number": 13,
+      "title": "Getting Started with N8N",
+      "content": "Ready to embark on your automation journey\nPractical next steps after this introduction\nLearn to install N8N in the next lesson\nSet up your very first workspace environment\nPrepare for hands-on experience and building",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448_keyframes/keyframe_012_t150.32s.jpg"
+    },
+    {
+      "number": 14,
+      "title": "What's Next?",
+      "content": "Transition from understanding to practical application\nStep-by-step guidance for installation process\nExplore setting up your workspace effectively\nBuild foundational knowledge for advanced workflows\nContinue your N8N learning path seamlessly",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448_keyframes/keyframe_013_t152.99s.jpg"
+    },
+    {
+      "number": 15,
+      "title": "Conclusion & Call to Action",
+      "content": "Say goodbye to mundane, repetitive tasks today\nEmbrace the future of intelligent automation\nStart building powerful N8N workflows\nJoin the growing community of N8N users\nUnlock efficiency and transform your daily work",
+      "keyframe_path": "/Users/falahi/VidScrib/saved_results/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448_keyframes/keyframe_014_t163.66s.jpg"
+    }
+  ],
+  "output_path": "/Users/falahi/VidScrib/outputs/What_Is_n8n__The_Beginner-Friendly_Automation_Tool_Explained_1_1_20251224_205448.pptx",
+  "output_type": "ppt",
+  "template": "modern_tech",
+  "processing_time": 134.56854701042175
+}

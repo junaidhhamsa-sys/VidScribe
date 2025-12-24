@@ -1,4 +1,4 @@
-"""Gemini AI processor for video analysis and summarization"""
+"""Gemini AI processor with dual-pool key rotation (vision + text)"""
 
 import google.generativeai as genai
 from PIL import Image
@@ -12,34 +12,71 @@ logger = logging.getLogger(__name__)
 
 
 class GeminiProcessor:
-    """Handle all Gemini AI interactions with rate limit protection"""
+    """Handle all Gemini AI interactions with dual-pool key rotation"""
     
-    def __init__(self, api_key: str = None, model_name: str = None):
+    def __init__(self, api_keys: List[str] = None, model_name: str = None):
         """
-        Initialize Gemini processor
+        Initialize Gemini processor with dual-pool architecture
         
         Args:
-            api_key: Gemini API key (uses config if None)
+            api_keys: List of Gemini API keys for rotation
             model_name: Model name (uses config if None)
         """
-        self.api_key = api_key or config.GEMINI_API_KEY
+        self.api_keys = api_keys or config.GEMINI_API_KEYS
         self.model_name = model_name or config.GEMINI_MODEL
         
-        if not self.api_key:
-            raise ValueError("Gemini API key not configured. Set GEMINI_API_KEY in .env file")
+        if not self.api_keys or len(self.api_keys) == 0:
+            raise ValueError("No Gemini API keys configured. Set GEMINI_API_KEYS in .env file")
         
-        # Configure Gemini
-        genai.configure(api_key=self.api_key)
+        # Dual-pool indices (independent rotation)
+        self.vision_key_index = 0
+        self.text_key_index = 0
         
-        # Initialize model
-        self.model = genai.GenerativeModel(self.model_name)
+        # Initialize both pools
+        self._switch_vision_key()
+        self._switch_text_key()
         
-        logger.info(f"Gemini processor initialized with model: {self.model_name}")
-        logger.info(f"⚠️  Free tier limit: 10 requests/minute")
+        logger.info("=" * 70)
+        logger.info("🎯 DUAL-POOL GEMINI PROCESSOR INITIALIZED")
+        logger.info("=" * 70)
+        logger.info(f"📸 Vision Pool: {len(self.api_keys)} API keys with rotation")
+        logger.info(f"📝 Text Pool: {len(self.api_keys)} API keys with rotation")
+        logger.info(f"✅ Independent key rotation for rate limit protection")
+        logger.info("=" * 70)
+    
+    def _switch_vision_key(self):
+        """Switch to specific vision pool API key"""
+        api_key = self.api_keys[self.vision_key_index]
+        genai.configure(api_key=api_key)
+        self.vision_model = genai.GenerativeModel(self.model_name)
+        logger.info(f"🔑 Vision Pool: Using key #{self.vision_key_index + 1}/{len(self.api_keys)}")
+    
+    def _switch_text_key(self):
+        """Switch to specific text pool API key"""
+        api_key = self.api_keys[self.text_key_index]
+        genai.configure(api_key=api_key)
+        self.text_model = genai.GenerativeModel(self.model_name)
+        logger.info(f"🔑 Text Pool: Using key #{self.text_key_index + 1}/{len(self.api_keys)}")
+    
+    def _rotate_vision_key(self):
+        """Rotate to next vision pool API key"""
+        self.vision_key_index = (self.vision_key_index + 1) % len(self.api_keys)
+        self._switch_vision_key()
+        logger.info(f"🔄 Vision Pool: Rotated to next key")
+    
+    def _rotate_text_key(self):
+        """Rotate to next text pool API key"""
+        self.text_key_index = (self.text_key_index + 1) % len(self.api_keys)
+        self._switch_text_key()
+        logger.info(f"🔄 Text Pool: Rotated to next key")
+    
+    # ========================================================================
+    # VISION POOL METHODS
+    # ========================================================================
     
     def generate_image_caption(self, image_path: str, custom_prompt: str = None) -> str:
         """
-        Generate caption for a single image with retry logic
+        Generate caption for a single image with retry logic (VISION POOL)
         
         Args:
             image_path: Path to image file
@@ -64,8 +101,8 @@ class GeminiProcessor:
             Be concise and informative.
             """
             
-            # Generate caption
-            response = self.model.generate_content([prompt, img])
+            # Generate caption using vision pool
+            response = self.vision_model.generate_content([prompt, img])
             caption = response.text.strip()
             
             return caption
@@ -77,7 +114,7 @@ class GeminiProcessor:
     def generate_captions_batch(self, image_paths: List[str], 
                                 delay: float = 6.5) -> List[Dict[str, str]]:
         """
-        Generate captions for multiple images with automatic rate limit handling
+        Generate captions for multiple images with automatic rate limit handling (VISION POOL)
         
         Args:
             image_paths: List of image file paths
@@ -92,11 +129,15 @@ class GeminiProcessor:
         
         logger.info(f"Generating captions for {total_images} images...")
         logger.info(f"⏱️  Estimated time: ~{estimated_time / 60:.1f} minutes (with rate limit protection)")
+        logger.info(f"🔑 Using {len(self.api_keys)} vision pool keys with rotation")
         logger.info(f"💡 Using {delay}s delay between requests to stay under 10/min limit")
+        
+        consecutive_failures = 0
+        max_consecutive_failures = len(self.api_keys)
         
         for i, image_path in enumerate(image_paths, 1):
             retry_count = 0
-            max_retries = 3
+            max_retries = 2
             success = False
             
             while retry_count < max_retries and not success:
@@ -109,8 +150,9 @@ class GeminiProcessor:
                         'caption': caption
                     })
                     
-                    logger.info(f"  [{i}/{total_images}] ✅ Captioned")
+                    logger.info(f"  [{i}/{total_images}] ✅ Captioned (Vision Key #{self.vision_key_index + 1})")
                     success = True
+                    consecutive_failures = 0  # Reset failure counter
                     
                     # Rate limiting - wait before next request (except for last image)
                     if i < total_images:
@@ -126,20 +168,19 @@ class GeminiProcessor:
                     
                     if is_rate_limit:
                         retry_count += 1
+                        consecutive_failures += 1
                         
-                        # Extract wait time from error message
-                        wait_time = self._extract_wait_time(error_msg)
-                        
-                        if retry_count < max_retries:
-                            logger.warning(f"  ⏳ [{i}/{total_images}] Rate limit hit!")
-                            logger.warning(f"     Waiting {wait_time:.0f}s before retry {retry_count}/{max_retries}...")
-                            time.sleep(wait_time)
+                        if retry_count < max_retries and consecutive_failures < max_consecutive_failures:
+                            # Try rotating to next key
+                            logger.warning(f"  ⏳ [{i}/{total_images}] Rate limit on vision key #{self.vision_key_index + 1}")
+                            self._rotate_vision_key()
+                            logger.warning(f"     Retrying with vision key #{self.vision_key_index + 1}...")
                         else:
-                            # Max retries reached
-                            logger.error(f"  ❌ [{i}/{total_images}] Failed after {max_retries} retries")
+                            # All keys exhausted
+                            logger.error(f"  ❌ [{i}/{total_images}] All vision keys rate limited")
                             captions.append({
                                 'image_path': image_path,
-                                'caption': '[Caption unavailable - rate limit exceeded]'
+                                'caption': '[Caption unavailable - all keys rate limited]'
                             })
                             success = True  # Move to next image
                     else:
@@ -154,44 +195,81 @@ class GeminiProcessor:
         logger.info(f"✅ Caption generation complete: {len(captions)}/{total_images} successful")
         return captions
     
-    def _extract_wait_time(self, error_message: str) -> float:
+    def select_key_visuals(self, captions: List[Dict], 
+                          transcript: str, num_visuals: int = 5) -> List[int]:
         """
-        Extract wait time from rate limit error message
+        Use AI to select most important visuals (VISION POOL)
         
         Args:
-            error_message: Error message from API
+            captions: List of image captions
+            transcript: Full transcript
+            num_visuals: Number of visuals to select
             
         Returns:
-            Wait time in seconds (with 5s buffer added)
+            List of indices of selected images
         """
-        # Default wait time
-        default_wait = 60
+        max_retries = 2
+        retry_count = 0
         
-        try:
-            # Try to find "retry in XX.XXs" pattern
-            match = re.search(r'retry in ([\d.]+)s', error_message)
-            if match:
-                wait_time = float(match.group(1))
-                # Add 5 second buffer for safety
-                return wait_time + 5
-            
-            # Try to find "seconds: XX" pattern
-            match = re.search(r'seconds["\s:]+(\d+)', error_message)
-            if match:
-                wait_time = float(match.group(1))
-                return wait_time + 5
+        while retry_count < max_retries:
+            try:
+                captions_text = "\n".join([
+                    f"{i}. {cap['caption']}" 
+                    for i, cap in enumerate(captions)
+                    if not cap['caption'].startswith('[')
+                ])
                 
-        except Exception as e:
-            logger.debug(f"Could not parse wait time: {e}")
+                prompt = f"""
+                Given these visual descriptions from a video and the transcript, 
+                select the {num_visuals} MOST IMPORTANT visuals that best represent the key concepts.
+                
+                VISUALS:
+                {captions_text}
+                
+                TRANSCRIPT SNIPPET:
+                {transcript[:1000]}...
+                
+                Return ONLY the numbers (0-{len(captions)-1}) of the {num_visuals} most important visuals, 
+                comma-separated, like: 0,3,7,12,15
+                """
+                
+                response = self.vision_model.generate_content(prompt)
+                indices_text = response.text.strip()
+                
+                # Parse indices
+                indices = [int(x.strip()) for x in indices_text.split(',') if x.strip().isdigit()]
+                indices = [i for i in indices if 0 <= i < len(captions)][:num_visuals]
+                
+                logger.info(f"Selected {len(indices)} key visuals: {indices}")
+                return indices
+                
+            except Exception as e:
+                error_msg = str(e)
+                is_rate_limit = '429' in error_msg or 'quota' in error_msg.lower()
+                
+                if is_rate_limit and retry_count < max_retries - 1:
+                    retry_count += 1
+                    logger.warning(f"⏳ Rate limit on visual selection (vision key #{self.vision_key_index + 1})")
+                    self._rotate_vision_key()
+                    logger.warning(f"   Retrying with vision key #{self.vision_key_index + 1}...")
+                else:
+                    logger.error(f"Error selecting visuals: {e}")
+                    # Fallback: evenly spaced selection
+                    step = len(captions) // num_visuals if num_visuals > 0 else 1
+                    return list(range(0, len(captions), step))[:num_visuals]
         
-        # Return default if parsing failed
-        logger.debug(f"Using default wait time: {default_wait}s")
-        return default_wait
+        # Fallback
+        step = len(captions) // num_visuals if num_visuals > 0 else 1
+        return list(range(0, len(captions), step))[:num_visuals]
+    
+    # ========================================================================
+    # TEXT POOL METHODS
+    # ========================================================================
     
     def create_video_summary(self, transcript: str, captions: List[Dict], 
                             custom_prompt: str = None) -> Dict[str, str]:
         """
-        Create comprehensive video summary with retry logic
+        Create comprehensive video summary with retry logic (TEXT POOL)
         
         Args:
             transcript: Audio transcript text
@@ -203,6 +281,8 @@ class GeminiProcessor:
         """
         max_retries = 3
         retry_count = 0
+        consecutive_failures = 0
+        max_consecutive_failures = len(self.api_keys)
         
         while retry_count < max_retries:
             try:
@@ -250,14 +330,14 @@ class GeminiProcessor:
                 {visual_content}
                 """
                 
-                # Generate summary
-                response = self.model.generate_content(prompt)
+                # Generate summary using text pool
+                response = self.text_model.generate_content(prompt)
                 summary_text = response.text.strip()
                 
                 # Parse response
                 summary = self._parse_summary_response(summary_text)
                 
-                logger.info("✅ Video summary generated successfully")
+                logger.info("✅ Video summary generated successfully (text pool)")
                 return summary
                 
             except Exception as e:
@@ -266,14 +346,14 @@ class GeminiProcessor:
                 
                 if is_rate_limit:
                     retry_count += 1
-                    wait_time = self._extract_wait_time(error_msg)
+                    consecutive_failures += 1
                     
-                    if retry_count < max_retries:
-                        logger.warning(f"⏳ Rate limit on summary generation")
-                        logger.warning(f"   Waiting {wait_time:.0f}s before retry {retry_count}/{max_retries}...")
-                        time.sleep(wait_time)
+                    if retry_count < max_retries and consecutive_failures < max_consecutive_failures:
+                        logger.warning(f"⏳ Rate limit on summary (text key #{self.text_key_index + 1})")
+                        self._rotate_text_key()
+                        logger.warning(f"   Retrying with text key #{self.text_key_index + 1}... ({retry_count}/{max_retries})")
                     else:
-                        logger.error("❌ Summary generation failed after retries")
+                        logger.error("❌ Summary generation failed - all text keys rate limited")
                         return self._create_fallback_summary(transcript)
                 else:
                     logger.error(f"Error creating video summary: {e}")
@@ -281,19 +361,10 @@ class GeminiProcessor:
         
         return self._create_fallback_summary(transcript)
     
-    def _create_fallback_summary(self, transcript: str) -> Dict:
-        """Create basic summary when AI generation fails"""
-        return {
-            'title': 'Video Summary',
-            'overview': transcript[:200] + '...' if len(transcript) > 200 else transcript,
-            'key_points': ['Summary generation unavailable due to rate limits'],
-            'detailed_summary': transcript
-        }
-    
     def create_content_sections(self, transcript: str, 
                                num_sections: int = 5) -> Dict:
         """
-        Create structured content sections with retry logic
+        Create structured content sections with retry logic (TEXT POOL)
         
         Args:
             transcript: Full transcript text
@@ -304,6 +375,8 @@ class GeminiProcessor:
         """
         max_retries = 3
         retry_count = 0
+        consecutive_failures = 0
+        max_consecutive_failures = len(self.api_keys)
         
         while retry_count < max_retries:
             try:
@@ -461,10 +534,10 @@ class GeminiProcessor:
                 {transcript}
                 """
                 
-                response = self.model.generate_content(prompt)
+                response = self.text_model.generate_content(prompt)
                 result = self._parse_sections_response(response.text.strip())
                 
-                logger.info(f"✅ Created {len(result['sections'])} content sections")
+                logger.info(f"✅ Created {len(result['sections'])} content sections (text pool)")
                 return result
                 
             except Exception as e:
@@ -473,20 +546,67 @@ class GeminiProcessor:
                 
                 if is_rate_limit:
                     retry_count += 1
-                    wait_time = self._extract_wait_time(error_msg)
+                    consecutive_failures += 1
                     
-                    if retry_count < max_retries:
-                        logger.warning(f"⏳ Rate limit on section creation")
-                        logger.warning(f"   Waiting {wait_time:.0f}s before retry {retry_count}/{max_retries}...")
-                        time.sleep(wait_time)
+                    if retry_count < max_retries and consecutive_failures < max_consecutive_failures:
+                        logger.warning(f"⏳ Rate limit on section creation (text key #{self.text_key_index + 1})")
+                        self._rotate_text_key()
+                        logger.warning(f"   Retrying with text key #{self.text_key_index + 1}... ({retry_count}/{max_retries})")
                     else:
-                        logger.error("❌ Section creation failed after retries")
+                        logger.error("❌ Section creation failed - all text keys rate limited")
                         return self._create_fallback_sections(transcript, num_sections)
                 else:
                     logger.error(f"Error creating content sections: {e}")
                     return self._create_fallback_sections(transcript, num_sections)
         
         return self._create_fallback_sections(transcript, num_sections)
+    
+    # ========================================================================
+    # HELPER FUNCTIONS (unchanged)
+    # ========================================================================
+    
+    def _extract_wait_time(self, error_message: str) -> float:
+        """
+        Extract wait time from rate limit error message
+        
+        Args:
+            error_message: Error message from API
+            
+        Returns:
+            Wait time in seconds (with 5s buffer added)
+        """
+        # Default wait time
+        default_wait = 60
+        
+        try:
+            # Try to find "retry in XX.XXs" pattern
+            match = re.search(r'retry in ([\d.]+)s', error_message)
+            if match:
+                wait_time = float(match.group(1))
+                # Add 5 second buffer for safety
+                return wait_time + 5
+            
+            # Try to find "seconds: XX" pattern
+            match = re.search(r'seconds["\s:]+(\\d+)', error_message)
+            if match:
+                wait_time = float(match.group(1))
+                return wait_time + 5
+                
+        except Exception as e:
+            logger.debug(f"Could not parse wait time: {e}")
+        
+        # Return default if parsing failed
+        logger.debug(f"Using default wait time: {default_wait}s")
+        return default_wait
+    
+    def _create_fallback_summary(self, transcript: str) -> Dict:
+        """Create basic summary when AI generation fails"""
+        return {
+            'title': 'Video Summary',
+            'overview': transcript[:200] + '...' if len(transcript) > 200 else transcript,
+            'key_points': ['Summary generation unavailable due to rate limits'],
+            'detailed_summary': transcript
+        }
     
     def _create_fallback_sections(self, transcript: str, num_sections: int) -> Dict:
         """Create basic sections when AI generation fails"""
@@ -511,56 +631,6 @@ class GeminiProcessor:
             'sections': sections,
             'takeaways': ['Summary generation unavailable']
         }
-    
-    def select_key_visuals(self, captions: List[Dict], 
-                          transcript: str, num_visuals: int = 5) -> List[int]:
-        """
-        Use AI to select most important visuals
-        
-        Args:
-            captions: List of image captions
-            transcript: Full transcript
-            num_visuals: Number of visuals to select
-            
-        Returns:
-            List of indices of selected images
-        """
-        try:
-            captions_text = "\n".join([
-                f"{i}. {cap['caption']}" 
-                for i, cap in enumerate(captions)
-                if not cap['caption'].startswith('[')
-            ])
-            
-            prompt = f"""
-            Given these visual descriptions from a video and the transcript, 
-            select the {num_visuals} MOST IMPORTANT visuals that best represent the key concepts.
-            
-            VISUALS:
-            {captions_text}
-            
-            TRANSCRIPT SNIPPET:
-            {transcript[:1000]}...
-            
-            Return ONLY the numbers (0-{len(captions)-1}) of the {num_visuals} most important visuals, 
-            comma-separated, like: 0,3,7,12,15
-            """
-            
-            response = self.model.generate_content(prompt)
-            indices_text = response.text.strip()
-            
-            # Parse indices
-            indices = [int(x.strip()) for x in indices_text.split(',') if x.strip().isdigit()]
-            indices = [i for i in indices if 0 <= i < len(captions)][:num_visuals]
-            
-            logger.info(f"Selected {len(indices)} key visuals: {indices}")
-            return indices
-            
-        except Exception as e:
-            logger.error(f"Error selecting visuals: {e}")
-            # Fallback: evenly spaced selection
-            step = len(captions) // num_visuals if num_visuals > 0 else 1
-            return list(range(0, len(captions), step))[:num_visuals]
     
     def _parse_summary_response(self, text: str) -> Dict[str, any]:
         """Parse structured summary response - supports multiple formats"""
@@ -710,26 +780,31 @@ class GeminiProcessor:
         return result
 
 
-    def test_gemini_connection(api_key: str = None) -> bool:
-        """
-        Test Gemini API connection
+def test_gemini_connection(api_key: str = None) -> bool:
+    """
+    Test Gemini API connection
     
-        Args:
-            api_key: API key to test (uses config if None)
+    Args:
+        api_key: API key to test (uses config if None)
         
-        Returns:
-            True if connection successful
-        """
-        try:
-            processor = GeminiProcessor(api_key=api_key)
+    Returns:
+        True if connection successful
+    """
+    try:
+        # Test with first available key
+        api_keys = [api_key] if api_key else config.GEMINI_API_KEYS
+        if not api_keys or len(api_keys) == 0:
+            raise ValueError("No API keys available for testing")
         
-            # Simple test prompt
-            response = processor.model.generate_content("Say 'Hello, Gemini is working!'")
-            result = response.text.strip()
+        processor = GeminiProcessor(api_keys=api_keys)
         
-            logger.info(f"✅ Gemini test successful: {result}")
-            return True
+        # Simple test prompt (using text pool)
+        response = processor.text_model.generate_content("Say 'Hello, Gemini is working!'")
+        result = response.text.strip()
         
-        except Exception as e:
-            logger.error(f"❌ Gemini test failed: {e}")
-            return False
+        logger.info(f"✅ Gemini test successful: {result}")
+        return True
+        
+    except Exception as e:
+        logger.error(f"❌ Gemini test failed: {e}")
+        return False

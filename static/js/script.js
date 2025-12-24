@@ -247,10 +247,14 @@ function handleFileSelect(event) {
 
 function handleFormatChange(event) {
     const format = event.target.value;
-    // Show/hide template selection based on format
+    console.log('📝 Output format changed to:', format);
+
+    // Show/hide template selection based on format (only show for PPT)
     if (format === 'ppt' && templateSection) {
+        console.log('✅ Showing template section for PPT');
         templateSection.classList.remove('hidden');
     } else if (templateSection) {
+        console.log('❌ Hiding template section for', format.toUpperCase());
         templateSection.classList.add('hidden');
     }
 }
@@ -654,6 +658,7 @@ let totalSlides = 1;
 let slidesData = [];
 let resultsOutputName = '';
 let selectedResultTemplate = 'professional';
+let currentOutputFormat = 'ppt';
 
 function loadResultsData() {
     const resultsDataEl = document.getElementById('resultsData');
@@ -664,6 +669,24 @@ function loadResultsData() {
         const outputName = resultsDataEl.dataset.outputName;
         const template = resultsDataEl.dataset.template;
         const title = resultsDataEl.dataset.title;
+        const outputFormat = resultsDataEl.dataset.outputFormat || 'ppt';
+        const summary = resultsDataEl.dataset.summary || '';
+
+        // Store output format
+        currentOutputFormat = outputFormat;
+
+        if (outputFormat === 'summary') {
+            // For summary format, we don't need slides
+            resultsOutputName = outputName;
+            const titleEl = document.getElementById('presentationTitle');
+            if (titleEl && title) titleEl.textContent = title;
+
+            // Store summary for display
+            window.summaryText = summary;
+
+            console.log('Loaded summary results');
+            return true;
+        }
 
         if (!slidesJson || slidesJson === '[]') {
             console.log('No results data found');
@@ -678,7 +701,8 @@ function loadResultsData() {
         console.log('Loaded results data:', {
             slides: totalSlides,
             outputName: resultsOutputName,
-            template: selectedResultTemplate
+            template: selectedResultTemplate,
+            format: currentOutputFormat
         });
 
         const titleEl = document.getElementById('presentationTitle');
@@ -703,6 +727,46 @@ function initResultsViewing() {
     const regenerateBtn = document.getElementById('regenerateBtn');
     const downloadResultBtn = document.getElementById('downloadResultBtn');
     const processAnotherBtn = document.getElementById('processAnotherBtn');
+    const processAnotherBtnSummary = document.getElementById('processAnotherBtnSummary');
+    const templateSelectorCard = document.getElementById('templateSelectorCard');
+    const summaryDisplayCard = document.getElementById('summaryDisplayCard');
+    const formatLabel = document.getElementById('outputFormatLabel');
+
+    // Update format label based on output type
+    if (formatLabel) {
+        if (currentOutputFormat === 'pdf') {
+            formatLabel.textContent = 'PDF Document (.pdf)';
+        } else if (currentOutputFormat === 'summary') {
+            formatLabel.textContent = 'Text Summary';
+        } else {
+            formatLabel.textContent = 'PowerPoint (.pptx)';
+        }
+    }
+
+    // Handle different output formats
+    if (currentOutputFormat === 'summary') {
+        // For Summary: hide template card, show summary card
+        if (templateSelectorCard) templateSelectorCard.classList.add('hidden');
+        if (summaryDisplayCard) {
+            summaryDisplayCard.classList.remove('hidden');
+            const summaryContent = document.getElementById('summaryContent');
+            if (summaryContent && window.summaryText) {
+                summaryContent.textContent = window.summaryText;
+            }
+        }
+
+        // Add event listener for summary's process another button
+        if (processAnotherBtnSummary) {
+            processAnotherBtnSummary.addEventListener('click', resetToUpload);
+        }
+
+        console.log('Summary format: showing summary text');
+        return; // Exit early for summary format
+    }
+
+    // For PPT and PDF: show template card, hide summary card
+    if (summaryDisplayCard) summaryDisplayCard.classList.add('hidden');
+    if (templateSelectorCard) templateSelectorCard.classList.remove('hidden');
 
     // Populate video summary stats
     const slidesCountEl = document.getElementById('slidesCount');
@@ -717,10 +781,36 @@ function initResultsViewing() {
         currentTemplateEl.textContent = templateName.charAt(0).toUpperCase() + templateName.slice(1);
     }
 
-    if (regenerateBtn) {
-        regenerateBtn.addEventListener('click', handleRegenerateTemplate);
+    // Handle PDF format: hide regeneration section
+    if (currentOutputFormat === 'pdf') {
+        // Hide template selection and regeneration button for PDF
+        const templateHeader = document.querySelector('.template-header');
+        const templateSelector = document.querySelector('.template-selector');
+        const templateInfoBox = document.querySelector('.template-info-box');
+        const divider = document.querySelector('#templateSelectorCard .divider');
+
+        if (templateHeader) templateHeader.style.display = 'none';
+        if (divider) divider.style.display = 'none';
+        if (templateSelector) {
+            // Hide regeneration controls but keep download and process another
+            const templateDropdownLabel = templateSelector.querySelector('label[for="templateDropdown"]');
+            const templateDropdown = document.getElementById('templateDropdown');
+            if (templateDropdownLabel) templateDropdownLabel.style.display = 'none';
+            if (templateDropdown) templateDropdown.style.display = 'none';
+            if (regenerateBtn) regenerateBtn.style.display = 'none';
+        }
+        if (templateInfoBox) templateInfoBox.style.display = 'none';
+
+        console.log('PDF format: hiding regeneration controls');
+    } else {
+        // For PPT: show all controls
+        if (regenerateBtn) {
+            regenerateBtn.addEventListener('click', handleRegenerateTemplate);
+        }
+        console.log('PPT format: showing all controls');
     }
 
+    // Download button for both PPT and PDF
     if (downloadResultBtn) {
         downloadResultBtn.addEventListener('click', () => {
             if (resultsOutputName) {
@@ -733,7 +823,7 @@ function initResultsViewing() {
         processAnotherBtn.addEventListener('click', resetToUpload);
     }
 
-    console.log('Results buttons initialized');
+    console.log('Results buttons initialized for format:', currentOutputFormat);
 }
 
 async function handleRegenerateTemplate() {

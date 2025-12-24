@@ -100,15 +100,15 @@
             <h3 class="card-title">Output Format</h3>
             <div class="radio-inputs">
               <label class="radio">
-                <input type="radio" name="output_format" value="ppt" checked>
+                <input type="radio" name="output_format" value="ppt" id="pptFormatRadio" checked>
                 <span class="name">PPT</span>
               </label>
               <label class="radio">
-                <input type="radio" name="output_format" value="pdf">
+                <input type="radio" name="output_format" value="pdf" id="pdfFormatRadio">
                 <span class="name">PDF</span>
               </label>
               <label class="radio">
-                <input type="radio" name="output_format" value="summary">
+                <input type="radio" name="output_format" value="summary" id="summaryFormatRadio">
                 <span class="name">Summary</span>
               </label>
             </div>
@@ -365,7 +365,7 @@ h78.747C231.693,100.736,232.77,106.162,232.77,111.694z"></path>
 
         <div class="results-simple-container">
           <!-- Template Selector Card -->
-          <div class="template-selector-card">
+          <div class="template-selector-card" id="templateSelectorCard">
 
             <!-- Video Details Summary -->
             <div class="video-summary-section">
@@ -382,7 +382,7 @@ h78.747C231.693,100.736,232.77,106.162,232.77,111.694z"></path>
                 </div>
                 <div class="stat-item">
                   <span class="stat-label">Format:</span>
-                  <span class="stat-value">PowerPoint (.pptx)</span>
+                  <span class="stat-value" id="outputFormatLabel">PowerPoint (.pptx)</span>
                 </div>
               </div>
             </div>
@@ -442,13 +442,28 @@ h78.747C231.693,100.736,232.77,106.162,232.77,111.694z"></path>
               <p class="template-note">No Gemini API calls during regeneration.</p>
             </div>
           </div>
+
+          <!-- Summary Display Section (for Summary format) -->
+          <div class="glass-card hidden" id="summaryDisplayCard" style="margin-top: 2rem;">
+            <h3 class="card-title">📝 Summary</h3>
+            <div id="summaryContent" style="padding: 1.5rem; line-height: 1.8; color: #334155; white-space: pre-wrap;">
+              <!-- Summary text will be inserted here by JavaScript -->
+            </div>
+            <div style="margin-top: 2rem; text-align: center;">
+              <button class="btn btn-secondary" id="processAnotherBtnSummary">
+                Process Another Video
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- Hidden data container - NO JINJA IN JAVASCRIPT! -->
         <div id="resultsData" class="hidden" data-slides='{{ slides | tojson | safe if slides else "[]" }}'
           data-output-name='{{ output_name if output_name else "" }}'
           data-template='{{ selected_template if selected_template else "professional" }}'
-          data-title='{{ presentation_title if presentation_title else "Presentation" }}'>
+          data-title='{{ presentation_title if presentation_title else "Presentation" }}'
+          data-output-format='{{ output_format if output_format else "ppt" }}'
+          data-summary='{{ summary if summary else "" }}'>
         </div>
       </section>
     </main>

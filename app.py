@@ -449,7 +449,9 @@ def show_results(output_name):
                          slides=results.get('slides', []),
                          output_name=output_name,
                          selected_template=results.get('template', config.DEFAULT_TEMPLATE),
-                         presentation_title=results.get('title', 'Video Summary'))
+                         presentation_title=results.get('title', 'Video Summary'),
+                         output_format=results.get('output_type', 'ppt'),
+                         summary=results.get('summary', ''))
 
 
 @app.route('/test-results')
