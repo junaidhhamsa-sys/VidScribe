@@ -72,6 +72,7 @@ class VideoPipeline:
         output_format: str = "ppt",
         ppt_template: str = None,
         output_name: str = None,
+        slide_count: int = None,
     ) -> Dict:
         """
         Process video through complete pipeline
@@ -81,6 +82,7 @@ class VideoPipeline:
             output_format: Output format ('ppt', 'pdf', or 'summary')
             ppt_template: Template name for PPT (only used if format is 'ppt')
             output_name: Base name for output files (auto-generated if None)
+            slide_count: Number of slides to generate (overrides config default)
 
         Returns:
             Dictionary with results and file paths
@@ -124,13 +126,34 @@ class VideoPipeline:
             temp_dir.mkdir(parents=True, exist_ok=True)
             keyframes_dir = temp_dir / "keyframes"
 
-            # Step 2: Extract keyframes
+            # Step 2: Extract keyframes with dynamic limit based on slide count
             logger.info(
                 f"\n{create_progress_message(2, 6, 'Extracting keyframes with OpenCV')}"
             )
+            
+            # Calculate max keyframes based on slide count
+            # 10 slides → 4 keyframes, 15 slides → 7 keyframes, 20 slides → 12 keyframes
+            num_slides = slide_count if slide_count is not None else config.PPT_SLIDES_COUNT
+            if num_slides <= 10:
+                max_keyframes = 4
+            elif num_slides <= 15:
+                max_keyframes = 7
+            else:  # 20+ slides
+                max_keyframes = 12
+            
+            logger.info(f"📊 Slide count: {num_slides} → Max keyframes: {max_keyframes}")
+            
+            # Temporarily override max_keyframes for this extraction
+            original_max = self.keyframe_extractor.max_keyframes
+            self.keyframe_extractor.max_keyframes = max_keyframes
+            
             keyframes = self.keyframe_extractor.extract_keyframes(
                 video_path, str(keyframes_dir)
             )
+            
+            # Restore original max_keyframes
+            self.keyframe_extractor.max_keyframes = original_max
+            
             keyframe_paths = [kf[1] for kf in keyframes]
             results["keyframe_count"] = len(keyframes)
             logger.info(f"✅ Extracted {len(keyframes)} keyframes")
@@ -170,8 +193,13 @@ class VideoPipeline:
             logger.info(f"✅ Generated {len(captions)} captions")
             
             logger.info(f"\n{create_progress_message(5, 6, 'Creating structured summary')}")
+            
+            # Use custom slide count or fall back to config default
+            num_slides = slide_count if slide_count is not None else config.PPT_SLIDES_COUNT
+            logger.info(f"📊 Generating {num_slides} content slides")
+            
             summary_data = self.ai_processor.create_content_sections(
-                transcript_data["text"], num_sections=config.PPT_SLIDES_COUNT
+                transcript_data["text"], num_sections=num_slides
             )
             logger.info(f"✅ Summary created: '{summary_data['title']}'")
 

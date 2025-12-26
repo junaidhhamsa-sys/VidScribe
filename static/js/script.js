@@ -249,12 +249,12 @@ function handleFormatChange(event) {
     const format = event.target.value;
     console.log('📝 Output format changed to:', format);
 
-    // Show/hide template selection based on format (only show for PPT)
+    // Show/hide template section (and slide count dropdown inside it) based on format
     if (format === 'ppt' && templateSection) {
-        console.log('✅ Showing template section for PPT');
+        console.log('✅ Showing template section and slide count for PPT');
         templateSection.classList.remove('hidden');
     } else if (templateSection) {
-        console.log('❌ Hiding template section for', format.toUpperCase());
+        console.log('❌ Hiding template section and slide count for', format.toUpperCase());
         templateSection.classList.add('hidden');
     }
 }

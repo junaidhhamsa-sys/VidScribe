@@ -49,6 +49,7 @@ def upload_video():
     # Get form parameters
     output_format = request.form.get('output_format', 'ppt')
     template = request.form.get('ppt_template', config.DEFAULT_TEMPLATE)
+    slide_count = request.form.get('slide_count', '10')  # Default: 10 slides (Short)
     
     filepath = None
     video_info = None
@@ -132,7 +133,7 @@ def upload_video():
         # Start processing in background thread
         thread = threading.Thread(
             target=process_video_background,
-            args=(filepath, output_format, template, output_name)
+            args=(filepath, output_format, template, output_name, slide_count)
         )
         thread.daemon = True
         thread.start()
@@ -161,7 +162,7 @@ def upload_video():
 
 
 def process_video_background(video_path: str, output_format: str, 
-                            template: str, output_name: str):
+                            template: str, output_name: str, slide_count: str = '10'):
     """Process video in background thread"""
     
     try:
@@ -177,12 +178,13 @@ def process_video_background(video_path: str, output_format: str,
         # Initialize pipeline with progress callback
         pipeline = VideoPipeline(progress_callback=update_progress)
         
-        # Process video
+        # Process video with custom slide count
         results = pipeline.process_video(
             video_path=video_path,
             output_format=output_format,
             ppt_template=template if output_format == 'ppt' else None,
-            output_name=output_name
+            output_name=output_name,
+            slide_count=int(slide_count) if output_format == 'ppt' else None
         )
         
         # Store results
