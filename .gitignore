@@ -21,6 +21,8 @@ outputs/*
 !outputs/.gitkeep
 temp/*
 !temp/.gitkeep
+saved_results/*
+!saved_results/.gitkeep
 
 # Logs
 logs/
