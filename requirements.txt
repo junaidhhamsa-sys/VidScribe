@@ -17,7 +17,7 @@ pydub>=0.25.1
 pyaudioop>=0.3.4  # Required for pydub on Python 3.13+
 
 # AI/ML
-google-generativeai>=0.3.2
+google-genai>=1.60.0
 
 # Document Generation
 python-pptx>=0.6.21

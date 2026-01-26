@@ -97,55 +97,106 @@ class YouTubeDownloader:
             
             # Generate output template
             if output_filename:
+                # Use custom filename
                 output_template = str(self.output_dir / f"{output_filename}.%(ext)s")
+                expected_file = self.output_dir / f"{output_filename}.mp4"
             else:
-                output_template = str(self.output_dir / "%(title)s_%(id)s.%(ext)s")
+                # Use video ID only for simpler, more reliable filenames
+                output_template = str(self.output_dir / "%(id)s.%(ext)s")
+                expected_file = None  # We'll determine this after getting video info
             
-            # Download options
+            # Download options - UPDATED for better audio+video merging
             ydl_opts = {
+                # Format: best video + best audio, merge to mp4
                 'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
                 'outtmpl': output_template,
                 'quiet': False,
                 'no_warnings': False,
                 'merge_output_format': 'mp4',
+                # Force merge even if video has audio
                 'postprocessors': [{
                     'key': 'FFmpegVideoConvertor',
                     'preferedformat': 'mp4',
                 }],
+                # Prefer formats with audio
+                'prefer_free_formats': True,
+                # Don't use HLS/DASH if possible (causes issues)
+                'extractor_args': {
+                    'youtube': {
+                        'player_client': ['android', 'web']
+                    }
+                },
             }
             
             # Download video
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                logger.info("Extracting video information...")
                 info = ydl.extract_info(url, download=True)
                 
-                # Get downloaded file path
-                if output_filename:
-                    downloaded_file = self.output_dir / f"{output_filename}.mp4"
-                else:
-                    video_id = info.get('id', 'unknown')
-                    title = info.get('title', 'video')
-                    # Clean title for filename
-                    safe_title = self._sanitize_filename(title)
-                    downloaded_file = self.output_dir / f"{safe_title}_{video_id}.mp4"
+                if not info:
+                    return False, "Failed to extract video information"
                 
-                # Check if file exists
-                if downloaded_file.exists():
-                    logger.info(f"✅ Download complete: {downloaded_file}")
-                    return True, str(downloaded_file)
+                video_id = info.get('id', 'unknown')
+                
+                # Determine downloaded file path
+                if output_filename:
+                    downloaded_file = expected_file
                 else:
-                    # Try to find the file with any extension
-                    possible_files = list(self.output_dir.glob(f"{output_filename}.*" if output_filename else "*"))
+                    # File was saved as video_id.mp4
+                    downloaded_file = self.output_dir / f"{video_id}.mp4"
+                
+                # Verify file exists and is not empty
+                if not downloaded_file.exists():
+                    # Try to find any .mp4 file with the video ID
+                    possible_files = list(self.output_dir.glob(f"*{video_id}*.mp4"))
                     if possible_files:
                         downloaded_file = possible_files[0]
-                        logger.info(f"✅ Download complete: {downloaded_file}")
-                        return True, str(downloaded_file)
+                        logger.info(f"Found downloaded file: {downloaded_file}")
                     else:
-                        return False, "Downloaded file not found"
+                        return False, f"Downloaded file not found. Expected: {downloaded_file}"
+                
+                # Check if file is not empty
+                file_size = downloaded_file.stat().st_size
+                if file_size == 0:
+                    logger.error("Downloaded file is empty (0 bytes)")
+                    downloaded_file.unlink()  # Delete empty file
+                    return False, "Downloaded file is empty. YouTube may have blocked the download."
+                
+                logger.info(f"✅ Download complete: {downloaded_file}")
+                logger.info(f"   Size: {file_size / (1024*1024):.2f}MB")
+                
+                # Check for audio using ffprobe or moviepy
+                has_audio = self._check_audio_track(str(downloaded_file))
+                if not has_audio:
+                    logger.warning("⚠️  Downloaded video may not have audio track!")
+                    logger.warning("   This could cause issues during transcription.")
+                
+                return True, str(downloaded_file)
         
         except Exception as e:
             error_msg = f"Download error: {str(e)}"
             logger.error(error_msg, exc_info=True)
             return False, error_msg
+    
+    def _check_audio_track(self, video_path: str) -> bool:
+        """
+        Check if video has an audio track using MoviePy
+        
+        Args:
+            video_path: Path to video file
+            
+        Returns:
+            True if audio track detected, False otherwise
+        """
+        try:
+            from moviepy import VideoFileClip
+            video = VideoFileClip(video_path)
+            has_audio = video.audio is not None
+            video.close()
+            return has_audio
+        except Exception as e:
+            logger.warning(f"Could not check audio track: {e}")
+            return True  # Assume it has audio if we can't check
     
     @staticmethod
     def _format_duration(seconds: int) -> str:

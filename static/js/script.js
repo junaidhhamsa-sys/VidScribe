@@ -412,11 +412,16 @@ async function checkStatus() {
                         currentResultsData.dataset.outputName = resultsDataEl.dataset.outputName;
                         currentResultsData.dataset.template = resultsDataEl.dataset.template;
                         currentResultsData.dataset.title = resultsDataEl.dataset.title;
+                        currentResultsData.dataset.outputFormat = resultsDataEl.dataset.outputFormat || 'ppt';
+                        currentResultsData.dataset.summary = resultsDataEl.dataset.summary || '';
                     }
 
                     // Load and show results
                     if (loadResultsData()) {
                         showResults();
+                    } else {
+                        // If loadResultsData fails, redirect to results page
+                        window.location.href = `/results/${currentOutputName}`;
                     }
                 } else {
                     // Fallback: redirect to results page
@@ -507,7 +512,7 @@ function showResults(results) {
     const summaryBox = document.getElementById('summaryBox');
     if (results.summary) {
         summaryBox.innerHTML = `
-            <h3>📝 Summary</h3>
+            <h2>Summary</h2>
             <p>${results.summary}</p>
         `;
     } else {

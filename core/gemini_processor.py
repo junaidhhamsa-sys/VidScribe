@@ -1,6 +1,7 @@
 """Gemini AI processor with dual-pool key rotation (vision + text)"""
 
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from PIL import Image
 import logging
 from typing import List, Dict, Optional
@@ -47,15 +48,13 @@ class GeminiProcessor:
     def _switch_vision_key(self):
         """Switch to specific vision pool API key"""
         api_key = self.api_keys[self.vision_key_index]
-        genai.configure(api_key=api_key)
-        self.vision_model = genai.GenerativeModel(self.model_name)
+        self.vision_client = genai.Client(api_key=api_key)
         logger.info(f"🔑 Vision Pool: Using key #{self.vision_key_index + 1}/{len(self.api_keys)}")
     
     def _switch_text_key(self):
         """Switch to specific text pool API key"""
         api_key = self.api_keys[self.text_key_index]
-        genai.configure(api_key=api_key)
-        self.text_model = genai.GenerativeModel(self.model_name)
+        self.text_client = genai.Client(api_key=api_key)
         logger.info(f"🔑 Text Pool: Using key #{self.text_key_index + 1}/{len(self.api_keys)}")
     
     def _rotate_vision_key(self):
@@ -102,7 +101,10 @@ class GeminiProcessor:
             """
             
             # Generate caption using vision pool
-            response = self.vision_model.generate_content([prompt, img])
+            response = self.vision_client.models.generate_content(
+                model=self.model_name,
+                contents=[prompt, img]
+            )
             caption = response.text.strip()
             
             return caption
@@ -233,7 +235,10 @@ class GeminiProcessor:
                 comma-separated, like: 0,3,7,12,15
                 """
                 
-                response = self.vision_model.generate_content(prompt)
+                response = self.vision_client.models.generate_content(
+                    model=self.model_name,
+                    contents=prompt
+                )
                 indices_text = response.text.strip()
                 
                 # Parse indices
@@ -331,7 +336,10 @@ class GeminiProcessor:
                 """
                 
                 # Generate summary using text pool
-                response = self.text_model.generate_content(prompt)
+                response = self.text_client.models.generate_content(
+                    model=self.model_name,
+                    contents=prompt
+                )
                 summary_text = response.text.strip()
                 
                 # Parse response
@@ -534,7 +542,10 @@ class GeminiProcessor:
                 {transcript}
                 """
                 
-                response = self.text_model.generate_content(prompt)
+                response = self.text_client.models.generate_content(
+                    model=self.model_name,
+                    contents=prompt
+                )
                 result = self._parse_sections_response(response.text.strip())
                 
                 logger.info(f"✅ Created {len(result['sections'])} content sections (text pool)")
@@ -799,7 +810,10 @@ def test_gemini_connection(api_key: str = None) -> bool:
         processor = GeminiProcessor(api_keys=api_keys)
         
         # Simple test prompt (using text pool)
-        response = processor.text_model.generate_content("Say 'Hello, Gemini is working!'")
+        response = processor.text_client.models.generate_content(
+            model=processor.model_name,
+            contents="Say 'Hello, Gemini is working!'"
+        )
         result = response.text.strip()
         
         logger.info(f"✅ Gemini test successful: {result}")

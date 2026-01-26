@@ -124,40 +124,54 @@ class VideoPipeline:
             # Create temp directory
             temp_dir = config.TEMP_FOLDER / output_name
             temp_dir.mkdir(parents=True, exist_ok=True)
-            keyframes_dir = temp_dir / "keyframes"
 
-            # Step 2: Extract keyframes with dynamic limit based on slide count
-            logger.info(
-                f"\n{create_progress_message(2, 6, 'Extracting keyframes with OpenCV')}"
-            )
+            # Determine if we need visual processing (keyframes + captions)
+            needs_visuals = output_format in ['ppt', 'pdf']
             
-            # Calculate max keyframes based on slide count
-            # 10 slides → 4 keyframes, 15 slides → 7 keyframes, 20 slides → 12 keyframes
-            num_slides = slide_count if slide_count is not None else config.PPT_SLIDES_COUNT
-            if num_slides <= 10:
-                max_keyframes = 4
-            elif num_slides <= 15:
-                max_keyframes = 7
-            else:  # 20+ slides
-                max_keyframes = 12
-            
-            logger.info(f"📊 Slide count: {num_slides} → Max keyframes: {max_keyframes}")
-            
-            # Temporarily override max_keyframes for this extraction
-            original_max = self.keyframe_extractor.max_keyframes
-            self.keyframe_extractor.max_keyframes = max_keyframes
-            
-            keyframes = self.keyframe_extractor.extract_keyframes(
-                video_path, str(keyframes_dir)
-            )
-            
-            # Restore original max_keyframes
-            self.keyframe_extractor.max_keyframes = original_max
-            
-            keyframe_paths = [kf[1] for kf in keyframes]
-            results["keyframe_count"] = len(keyframes)
-            logger.info(f"✅ Extracted {len(keyframes)} keyframes")
-            self._update_progress(33, f'Extracted {len(keyframes)} keyframes')
+            # Step 2: Extract keyframes (SKIP for summary-only)
+            if needs_visuals:
+                logger.info(
+                    f"\n{create_progress_message(2, 6, 'Extracting keyframes with OpenCV')}"
+                )
+                
+                keyframes_dir = temp_dir / "keyframes"
+                
+                # Calculate max keyframes based on slide count
+                # 10 slides → 4 keyframes, 15 slides → 7 keyframes, 20 slides → 12 keyframes
+                num_slides = slide_count if slide_count is not None else config.PPT_SLIDES_COUNT
+                if num_slides <= 10:
+                    max_keyframes = 4
+                elif num_slides <= 15:
+                    max_keyframes = 7
+                else:  # 20+ slides
+                    max_keyframes = 12
+                
+                logger.info(f"📊 Slide count: {num_slides} → Max keyframes: {max_keyframes}")
+                
+                # Temporarily override max_keyframes for this extraction
+                original_max = self.keyframe_extractor.max_keyframes
+                self.keyframe_extractor.max_keyframes = max_keyframes
+                
+                keyframes = self.keyframe_extractor.extract_keyframes(
+                    video_path, str(keyframes_dir)
+                )
+                
+                # Restore original max_keyframes
+                self.keyframe_extractor.max_keyframes = original_max
+                
+                keyframe_paths = [kf[1] for kf in keyframes]
+                results["keyframe_count"] = len(keyframes)
+                logger.info(f"✅ Extracted {len(keyframes)} keyframes")
+                self._update_progress(33, f'Extracted {len(keyframes)} keyframes')
+            else:
+                # Skip keyframe extraction for summary
+                logger.info(
+                    f"\n{create_progress_message(2, 6, 'Skipping keyframes (summary mode)')}"
+                )
+                logger.info("⏩ Keyframe extraction skipped - not needed for text summary")
+                keyframe_paths = []
+                results["keyframe_count"] = 0
+                self._update_progress(33, 'Skipped keyframe extraction')
 
             # Step 3: Extract audio and transcribe
             logger.info(
@@ -184,14 +198,24 @@ class VideoPipeline:
             )
             self._update_progress(50, 'Audio transcribed')
 
-            # Step 4 & 5: Generate captions and summary using Gemini
-            logger.info(f"\n{create_progress_message(4, 6, 'Generating captions with Gemini AI')}")
+            # Step 4: Generate captions (SKIP for summary-only)
+            if needs_visuals:
+                logger.info(f"\n{create_progress_message(4, 6, 'Generating captions with Gemini AI')}")
+                
+                captions = self.ai_processor.generate_captions_batch(
+                    keyframe_paths, delay=0.5
+                )
+                logger.info(f"✅ Generated {len(captions)} captions")
+                results["captions"] = captions
+                self._update_progress(66, 'Image captions generated')
+            else:
+                # Skip caption generation for summary
+                logger.info(f"\n{create_progress_message(4, 6, 'Skipping captions (summary mode)')}")
+                logger.info("⏩ Caption generation skipped - not needed for text summary")
+                results["captions"] = []
+                self._update_progress(66, 'Skipped caption generation')
             
-            captions = self.ai_processor.generate_captions_batch(
-                keyframe_paths, delay=0.5
-            )
-            logger.info(f"✅ Generated {len(captions)} captions")
-            
+            # Step 5: Create summary
             logger.info(f"\n{create_progress_message(5, 6, 'Creating structured summary')}")
             
             # Use custom slide count or fall back to config default
@@ -205,41 +229,72 @@ class VideoPipeline:
 
             self._update_progress(83, 'Content summarized')
 
-            # Continue with results
-            results["captions"] = captions
+            # Set common results
             results["title"] = summary_data["title"]
             results["overview"] = summary_data["overview"]
-            results["summary"] = summary_data["overview"]
             
+            # Build comprehensive summary for summary-only format
+            if output_format == "summary":
+                # Create detailed text summary with all sections
+                summary_parts = []
+                
+                # Add title
+                summary_parts.append(f"# {summary_data['title']}\n")
+                
+                # Add overview
+                summary_parts.append(f"## Overview\n{summary_data['overview']}\n")
+                
+                # Add all sections with content
+                for i, section in enumerate(summary_data["sections"], 1):
+                    summary_parts.append(f"## {i}. {section['title']}")
+                    summary_parts.append("\n".join(f"• {point}" for point in section["content"]))
+                    summary_parts.append("")  # Empty line between sections
+                
+                # Add key takeaways
+                if summary_data.get("takeaways"):
+                    summary_parts.append("## Key Takeaways")
+                    summary_parts.append("\n".join(f"✓ {point}" for point in summary_data["takeaways"]))
+                
+                # Join all parts with newlines
+                results["summary"] = "\n\n".join(summary_parts)
+                logger.info(f"📝 Built comprehensive summary: {len(results['summary'])} characters")
+            else:
+                # For PPT/PDF, just use the overview
+                results["summary"] = summary_data["overview"]
             
-            # Create slides data
-            slides = []
-            for i, section in enumerate(summary_data["sections"]):
-                # Match keyframes to sections
-                keyframe_path = None
-                if i < len(keyframe_paths):
-                    keyframe_path = keyframe_paths[i]
+            # Create slides data (only if needed for PPT/PDF)
+            if needs_visuals:
+                slides = []
+                for i, section in enumerate(summary_data["sections"]):
+                    # Match keyframes to sections
+                    keyframe_path = None
+                    if i < len(keyframe_paths):
+                        keyframe_path = keyframe_paths[i]
 
-                slides.append(
-                    {
-                        "number": i + 1,
-                        "title": section["title"],
-                        "content": "\n".join(section["content"]),
-                        "keyframe_path": keyframe_path,
-                    }
-                )
+                    slides.append(
+                        {
+                            "number": i + 1,
+                            "title": section["title"],
+                            "content": "\n".join(section["content"]),
+                            "keyframe_path": keyframe_path,
+                        }
+                    )
 
-            # Add takeaways slide
-            if summary_data.get("takeaways"):
-                slides.append(
-                    {
-                        "number": len(slides) + 1,
-                        "title": "Key Takeaways",
-                        "content": "\n".join(summary_data["takeaways"]),
-                    }
-                )
+                # Add takeaways slide
+                if summary_data.get("takeaways"):
+                    slides.append(
+                        {
+                            "number": len(slides) + 1,
+                            "title": "Key Takeaways",
+                            "content": "\n".join(summary_data["takeaways"]),
+                        }
+                    )
 
-            results["slides"] = slides
+                results["slides"] = slides
+            else:
+                # For summary mode, we don't need slides data
+                results["slides"] = []
+                logger.info("⏩ Slide creation skipped - returning text summary only")
 
             # Step 6: Generate output
             logger.info(

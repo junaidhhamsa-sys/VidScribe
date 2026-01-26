@@ -53,10 +53,22 @@ class AudioProcessor:
             audio_path = str(Path(video_path).parent / f"{video_name}_audio.{self.output_format}")
             
         try:
+            # Load video
+            video = VideoFileClip(video_path)
+            
+            # Check if video has audio
+            if video.audio is None:
+                video.close()
+                error_msg = (
+                    f"Video '{Path(video_path).name}' has no audio track. "
+                    "Please upload a video with audio to generate transcripts."
+                )
+                logger.error(f"❌ {error_msg}")
+                raise ValueError(error_msg)
+            
             # Extract audio using MoviePy first
             temp_audio = str(Path(audio_path).parent / f"temp_audio.wav")
             
-            video = VideoFileClip(video_path)
             # MoviePy 2.x compatibility - no verbose/logger parameters
             video.audio.write_audiofile(temp_audio)
             video.close()
@@ -89,6 +101,9 @@ class AudioProcessor:
             
             return audio_path
             
+        except ValueError:
+            # Re-raise ValueError with our custom message
+            raise
         except Exception as e:
             logger.error(f"Error extracting audio: {e}")
             raise
