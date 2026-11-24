@@ -71,7 +71,7 @@ GEMINI_API_KEYS = [
 # Filter out empty keys
 GEMINI_API_KEYS = [key for key in GEMINI_API_KEYS if key]
 
-GEMINI_MODEL = "gemini-2.5-flash"  # Free tier model with video support  gemma-3-27b,gemini-2.5-flash-live
+GEMINI_MODEL = "gemini-3-flash-preview"  # Free tier model with video support  gemma-3-27b,gemini-2.5-flash-live
 GEMINI_TEMPERATURE = 0.7  # Creativity level (0.0 = focused, 1.0 = creative)
 GEMINI_MAX_TOKENS = 2048  # Maximum tokens for summary generation
 

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1e40af;stop-opacity:1" />
+    </linearGradient>
+    <style>
+      @import url('https://fonts.cdnfonts.com/css/tektur');
+    </style>
+  </defs>
+  <!-- Rounded square background -->
+  <rect x="4" y="4" width="112" height="112" rx="24" ry="24" fill="url(#bgGrad)" />
+  <!-- VS text in Tektur font -->
+  <text x="60" y="82" text-anchor="middle" font-family="'Tektur', sans-serif" font-weight="700" font-size="62" fill="#ffffff" letter-spacing="-2">VS</text>
+</svg>

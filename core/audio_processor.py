@@ -1,9 +1,28 @@
 """Audio extraction and transcription using MoviePy and Groq Whisper"""
 
 import os
+import shutil
 import logging
 from pathlib import Path
 from pydub import AudioSegment
+
+# Configure ffmpeg/ffprobe path for pydub
+# The venv may strip /opt/homebrew/bin from PATH, so we check common locations
+def _find_executable(name):
+    """Find an executable, checking common Homebrew paths as fallback."""
+    found = shutil.which(name)
+    if found:
+        return found
+    # Common Homebrew install locations
+    for prefix in ["/opt/homebrew/bin", "/usr/local/bin"]:
+        candidate = os.path.join(prefix, name)
+        if os.path.isfile(candidate) and os.access(candidate, os.X_OK):
+            return candidate
+    return name  # fall back to bare name and let OS try
+
+AudioSegment.converter = _find_executable("ffmpeg")
+AudioSegment.ffmpeg = _find_executable("ffmpeg")
+AudioSegment.ffprobe = _find_executable("ffprobe")
 
 try:
     from moviepy import VideoFileClip

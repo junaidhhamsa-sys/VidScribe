@@ -14,7 +14,7 @@ moviepy>=2.2.1
 openai-whisper>=20250625
 groq>=1.0.0
 pydub>=0.25.1
-pyaudioop>=0.3.4  # Required for pydub on Python 3.13+
+
 
 # AI/ML
 google-genai>=1.60.0
